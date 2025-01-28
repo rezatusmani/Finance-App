@@ -1,9 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import './App.css';
 import ExpenseTracker from './ExpenseTracker'; // Import ExpenseTracker component
+import PlaidLink from './PlaidLink'; // Import new PlaidLink component (we'll create this)
 
 function App() {
+    console.log(process.env.PLAID_CLIENT_ID);
+    console.log(process.env.PLAID_SECRET);
+    console.log(process.env.PLAID_ENV);
+
     return (
         <Router>
             <div className="app-container">
@@ -13,13 +18,15 @@ function App() {
                         <li>
                             <Link to="/expense-tracker" className="nav-link">Expense Tracker</Link>
                         </li>
-                        {/* Add more links here for other features */}
+                        <li>
+                            <Link to="/plaid-link" className="nav-link">Connect Bank Account</Link>
+                        </li>
                     </ul>
                 </nav>
 
-                <Routes className="app-routes"> 
+                <Routes className="app-routes">
                     <Route path="/expense-tracker" element={<ExpenseTracker />} />
-                    {/* Add more routes here for other features */}
+                    <Route path="/plaid-link" element={<PlaidLink />} /> {/* Add Plaid Link route */}
                     <Route path="/" element={<h2 className="welcome-message">Welcome to My App! Select a feature from the menu.</h2>} />
                 </Routes>
             </div>
