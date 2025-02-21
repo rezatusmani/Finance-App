@@ -1,4 +1,5 @@
 {
+  "proxy": "http://localhost:5000",
   "dependencies": {
     "dotenv": "^16.4.7",
     "git": "^0.1.5"

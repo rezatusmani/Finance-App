@@ -1,15 +1,15 @@
-const express = require('express');
 const { Pool } = require('pg');
-const cors = require('cors');
 const Joi = require('joi');
 require('dotenv').config();
-const { Configuration, PlaidApi, PlaidEnvironments } = require('plaid');
+const express = require('express');
+const cors = require('cors');
 
 // Initialize the app
 const app = express();
 
-// Enable CORS for all origins (you can limit to specific origins if needed)
-app.use(cors());
+app.use(cors()); // Allow frontend requests
+app.use(express.json()); // << This is important to parse JSON request bodies
+app.use(express.urlencoded({ extended: true })); // << Add this to support URL-encoded requests
 
 // Middleware for setting custom headers (if needed)
 app.use((req, res, next) => {
@@ -20,9 +20,7 @@ app.use((req, res, next) => {
 });
 
 // Log environment variables to confirm they are loaded
-console.log(process.env.PLAID_CLIENT_ID);
-console.log(process.env.PLAID_SECRET);
-console.log(process.env.PLAID_ENV);
+console.log(process.env.PLAID_CLIENT_ID);  // No longer needed, can be removed
 
 // Database connection
 const pool = new Pool({
@@ -32,56 +30,6 @@ const pool = new Pool({
     password: 'rezasfinances',
     port: 5432,
 });
-
-//#region Third-Party services like databases or APIs
-
-// Configure Plaid client
-const configuration = new Configuration({
-    basePath: PlaidEnvironments[process.env.PLAID_ENV],
-    baseOptions: {
-        headers: {
-            'PLAID-CLIENT-ID': process.env.PLAID_CLIENT_ID,
-            'PLAID-SECRET': process.env.PLAID_SECRET,
-        },
-    },
-});
-const plaidClient = new PlaidApi(configuration);
-
-// Route to get transactions using Plaid API
-app.get('/transactions', async (req, res) => {
-    try {
-        const accessToken = req.query.access_token;  // You'd get this token after the public token exchange step
-        const response = await plaidClient.transactionsGet({
-            access_token: accessToken,
-            start_date: '2023-01-01',
-            end_date: '2025-01-27',
-        });
-
-        const transactions = response.data.transactions;
-        res.json(transactions);  // Send the transactions back to the frontend
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Error fetching transactions');
-    }
-});
-
-// Route to exchange public token for access token
-app.post('/exchange_public_token', async (req, res) => {
-    try {
-        const { public_token } = req.body;
-        const response = await plaidClient.itemPublicTokenExchange({ public_token });
-        const accessToken = response.data.access_token;
-        const itemId = response.data.item_id;
-
-        // Store the access token and item ID securely
-        res.json({ accessToken, itemId });
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Error exchanging public token');
-    }
-});
-
-//#endregion
 
 // Joi schema for validating expenses
 const expenseSchema = Joi.object({
@@ -111,6 +59,7 @@ app.get('/expenses', async (req, res) => {
         const result = await pool.query('SELECT * FROM expenses');
         res.json(result.rows);
     } catch (err) {
+        console.error(err);
         res.status(500).send(err.message);
     }
 });
