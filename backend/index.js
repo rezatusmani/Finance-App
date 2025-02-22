@@ -1,26 +1,18 @@
-const { Pool } = require('pg');
-const Joi = require('joi');
-require('dotenv').config();
 const express = require('express');
+const multer = require('multer');
+const Papa = require('papaparse');
+const fs = require('fs');
+const path = require('path');
+const { Pool } = require('pg');
 const cors = require('cors');
 
-// Initialize the app
 const app = express();
 
-app.use(cors()); // Allow frontend requests
-app.use(express.json()); // << This is important to parse JSON request bodies
-app.use(express.urlencoded({ extended: true })); // << Add this to support URL-encoded requests
+// Add the express.json() middleware to parse JSON requests
+app.use(express.json());
 
-// Middleware for setting custom headers (if needed)
-app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*'); // Allow all origins, or specify the frontend origin ('http://localhost:3000')
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    next();
-});
-
-// Log environment variables to confirm they are loaded
-console.log(process.env.PLAID_CLIENT_ID);  // No longer needed, can be removed
+// Allow all origins
+app.use(cors());
 
 // Database connection
 const pool = new Pool({
@@ -31,78 +23,122 @@ const pool = new Pool({
     port: 5432,
 });
 
-// Joi schema for validating expenses
-const expenseSchema = Joi.object({
-    date: Joi.string().isoDate().required(), // Ensures the date is in ISO format
-    category: Joi.string().valid('Needs', 'Wants', 'Savings').required(),
-    subcategory: Joi.string().valid('Travel', 'Subscriptions', 'Eating Out', 'Groceries', 'Needs', 'Activities').required(),
-    amount: Joi.number().positive().required(),
-    description: Joi.string().allow('').optional(),
-});
+// Setup file upload using multer
+const upload = multer({ dest: 'uploads/' });
 
-// Middleware for validating request body
-const validateExpense = (req, res, next) => {
-    const { error } = expenseSchema.validate(req.body);
-    if (error) {
-        // Return 400 Bad Request with validation error message
-        return res.status(400).json({ error: error.details[0].message });
-    }
-    next();
-};
-
-// Middleware to parse JSON bodies
-app.use(express.json());
-
-// Route to get all expenses
+// Fetch all expenses, sorted by transaction date
 app.get('/expenses', async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM expenses');
-        res.json(result.rows);
-    } catch (err) {
-        console.error(err);
-        res.status(500).send(err.message);
+        const result = await pool.query('SELECT * FROM expenses ORDER BY date DESC');
+        res.json(result.rows);  // Send back all the rows as JSON
+    } catch (error) {
+        console.error('Error fetching expenses:', error);
+        res.status(500).json({ error: 'Unable to fetch expenses' });
     }
 });
 
-// Route to create a new expense
-app.post('/expenses', validateExpense, async (req, res) => {
-    const { date, category, subcategory, amount, description } = req.body;
+// Endpoint for file upload
+app.post('/upload', upload.single('file'), async (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    try {
+        const filePath = path.join(__dirname, 'uploads', req.file.filename);
+        const fileContent = fs.readFileSync(filePath, 'utf8');
+
+        Papa.parse(fileContent, {
+            header: true,
+            dynamicTyping: true,
+            complete: async (results) => {
+                const parsedData = results.data;
+                const expenses = parsedData.map(row => {
+                    if (!row['Category']) {
+                        return null;
+                    }
+                    return {
+                        date: row['Transaction Date'],
+                        amount: row['Amount'],
+                        category: row['Category'],
+                        subcategory: row['Subcategory'] || 'UNSET',
+                        description: row['Description'],
+                    };
+                }).filter(expense => expense !== null);
+
+                if (expenses.length > 0) {
+                    await saveToDatabase(expenses);
+                    res.status(200).json(expenses);
+                } else {
+                    res.status(400).json({ error: 'No valid expenses found to insert' });
+                }
+            },
+            error: (error) => {
+                console.error('CSV Parsing Error:', error);
+                res.status(500).json({ error: 'Error parsing the CSV file' });
+            }
+        });
+    } catch (err) {
+        console.error('Error processing file:', err);
+        res.status(500).json({ error: 'Error processing file' });
+    }
+});
+
+// Save expenses to the database
+const saveToDatabase = async (expenses) => {
+    const query = 'INSERT INTO expenses (amount, category, subcategory, date, description, notes) VALUES ($1, $2, $3, $4, $5, $6)';
+
+    for (const expense of expenses) {
+        try {
+            // Ensure the amount is positive
+            const positiveAmount = Math.abs(expense.amount);
+
+            const checkQuery = 'SELECT * FROM expenses WHERE amount = $1 AND date = $2 AND description = $3';
+            const result = await pool.query(checkQuery, [
+                positiveAmount, // Use the positive amount
+                expense.date,
+                expense.description
+            ]);
+
+            if (result.rows.length === 0) {
+                await pool.query(query, [
+                    positiveAmount, // Use the positive amount
+                    expense.category,
+                    expense.subcategory,
+                    expense.date,
+                    expense.description,
+                    expense.notes || '',  // Default to empty string if no notes
+                ]);
+            } else {
+                console.log('Duplicate found, skipping:', expense);
+            }
+        } catch (error) {
+            console.error('Error inserting expense:', error);
+        }
+    }
+};
+
+
+// PUT route to update notes
+app.put('/expenses/:id', async (req, res) => {
+    const { id } = req.params;
+    const { notes } = req.body; // Ensure 'notes' is sent in the body
+
+    if (notes === undefined) {
+        return res.status(400).send('Notes field is missing');
+    }
+
     try {
         const result = await pool.query(
-            `INSERT INTO expenses (date, category, subcategory, amount, description) 
-             VALUES ($1, $2, $3, $4, $5) 
-             RETURNING *`, // Retrieve all columns, including the auto-generated id
-            [date, category, subcategory, amount, description]
+            'UPDATE expenses SET notes = $1 WHERE id = $2 RETURNING *',
+            [notes, id]
         );
-        res.status(201).json(result.rows[0]); // Respond with the inserted expense
-    } catch (err) {
-        console.error(err);
-        res.status(500).send(err.message);
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error updating notes');
     }
 });
 
-// Route to delete an expense by id
-app.delete('/expenses/:id', async (req, res) => {
-    const { id } = req.params;
-    try {
-        const result = await pool.query('DELETE FROM expenses WHERE id = $1 RETURNING *', [id]);
-        if (result.rowCount === 0) {
-            return res.status(404).send('Expense not found');
-        }
-        res.status(200).json({ message: 'Expense deleted successfully' });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send(err.message);
-    }
-});
-
-// Global error handler (optional)
-app.use((err, req, res, next) => {
-    console.error(err);
-    res.status(500).json({ error: 'Internal server error' });
-});
-
-// Start the server
 app.listen(5000, () => {
-    console.log('Server is running on port 5000');
+    console.log('Server running on http://localhost:5000');
 });

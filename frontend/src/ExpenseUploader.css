@@ -1,0 +1,62 @@
+.expense-uploader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    width: 100%;
+    padding: 0;
+}
+
+/* Hide default file input */
+input[type="file"] {
+    display: none;
+}
+
+/* Choose File / Upload Button */
+.custom-file-upload, .upload-button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: auto;
+    transition: background-color 0.3s;
+    display: inline-block;
+}
+
+.custom-file-upload:hover, .upload-button:hover {
+    background-color: #45a049;
+}
+
+/* File Info Section */
+.file-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+/* File Name Display */
+.file-info p {
+    font-size: 16px;
+    color: #333;
+    margin: 0;
+}
+
+/* Detach Button */
+.detach-button {
+    background-color: #d9534f;
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.detach-button:hover {
+    background-color: #c9302c;
+}

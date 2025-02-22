@@ -1,25 +1,27 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, } from 'react-router-dom';
 import './App.css';
-import ExpenseTracker from './ExpenseTracker'; // Import ExpenseTracker component
+import ExpenseUploader from './ExpenseUploader'; // Import ExpenseUploader component
+import TransactionsTable from './TransactionsTable'; // Import TransactionsTable component
+import Navigation from './Navigation'; // Import Navigation component
 
 function App() {
     return (
         <Router>
             <div className="app-container">
-                <h1 className="app-header">Finance App</h1>
-                <nav className="app-nav">
-                    <ul>
-                        <li>
-                            <Link to="/expense-tracker" className="nav-link">Expense Tracker</Link>
-                        </li>
-                    </ul>
-                </nav>
+                <div className='app-header-container'>
+                    <h1>Finance App</h1>
+                </div>
+                <Navigation />
 
-                <Routes className="app-routes">
-                    <Route path="/expense-tracker" element={<ExpenseTracker />} />
-                    <Route path="/" element={<h2 className="welcome-message">Welcome to My App! Select a feature from the menu.</h2>} />
-                </Routes>
+                <div className='app-content-container'>
+                    <Routes className="app-routes">
+                        <Route path="/transactions" element={<TransactionsTable />} />
+                        <Route path="/expense-uploader" element={<ExpenseUploader />} />
+                        <Route path="/expenses" element={<h2 className="error-message">Expenses page coming soon!</h2>} />
+                        <Route path="*" element={<h2 className="error-message">Page not found</h2>} />
+                    </Routes>
+                </div>
             </div>
         </Router>
     );
