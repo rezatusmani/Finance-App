@@ -108,7 +108,7 @@ const TransactionsTable = () => {
             await axios.put(`http://localhost:5000/expenses/${id}`, { subcategory });
             console.log('Subcategory updated successfully to', subcategory);
         } catch (error) {
-            console.error('Error updating Subcategory:', error);
+            console.error(`Error updating Subcategory to ${subcategory}:`, error);
         }
     };
 

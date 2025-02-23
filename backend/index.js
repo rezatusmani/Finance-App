@@ -53,13 +53,10 @@ app.post('/upload', upload.single('file'), async (req, res) => {
             complete: async (results) => {
                 const parsedData = results.data;
                 const expenses = parsedData.map(row => {
-                    if (!row['Category']) {
-                        return null;
-                    }
                     return {
                         date: row['Transaction Date'],
                         amount: row['Amount'],
-                        category: row['Category'],
+                        category: row['Category'] || 'Payment',
                         subcategory: row['Subcategory'] ||
                             row['Category'] === 'Food & Drink' ? 'Wants' :
                             row['Category'] === 'Entertainment' ? 'Wants' :
@@ -113,8 +110,6 @@ const saveToDatabase = async (expenses) => {
                     expense.description,
                     expense.notes || '',  // Default to empty string if no notes
                 ]);
-            } else {
-                console.log('Duplicate found, skipping:', expense);
             }
         } catch (error) {
             console.error('Error inserting expense:', error);
@@ -122,25 +117,30 @@ const saveToDatabase = async (expenses) => {
     }
 };
 
-
-// PUT route to update notes
+// PUT route to update any field of an expense
 app.put('/expenses/:id', async (req, res) => {
     const { id } = req.params;
-    const { notes } = req.body; // Ensure 'notes' is sent in the body
+    const updates = req.body; // Ensure the request body contains fields to update
 
-    if (notes === undefined) {
-        return res.status(400).send('Notes field is missing');
+    if (Object.keys(updates).length === 0) {
+        return res.status(400).send('No fields provided for update');
     }
+
+    const fields = Object.keys(updates);
+    const values = Object.values(updates);
+
+    const setClause = fields.map((field, index) => `${field} = $${index + 1}`).join(', ');
+    values.push(id); // Add id as the last parameter for WHERE clause
 
     try {
         const result = await pool.query(
-            'UPDATE expenses SET notes = $1 WHERE id = $2 RETURNING *',
-            [notes, id]
+            `UPDATE expenses SET ${setClause} WHERE id = $${values.length} RETURNING *`,
+            values
         );
         res.json(result.rows[0]);
     } catch (error) {
         console.error(error);
-        res.status(500).send('Error updating notes');
+        res.status(500).send('Error updating expense');
     }
 });
 
