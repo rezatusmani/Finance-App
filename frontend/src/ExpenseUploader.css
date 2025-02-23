@@ -24,18 +24,36 @@ input[type="file"] {
     width: auto;
     transition: background-color 0.3s;
     display: inline-block;
+    margin-left: 10px;
 }
 
 .custom-file-upload:hover, .upload-button:hover {
     background-color: #45a049;
 }
 
-/* File Info Section */
-.file-info {
+.file-actions {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 10px;
+    width: 100%;
+}
+
+.file-info-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+/* File Info Section */
+.file-info {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    height: 50px;
 }
 
 /* File Name Display */
@@ -43,6 +61,10 @@ input[type="file"] {
     font-size: 16px;
     color: #333;
     margin: 0;
+}
+
+.hide {
+    display: none;
 }
 
 /* Detach Button */
@@ -55,8 +77,19 @@ input[type="file"] {
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s;
+    margin-left: 10px;
 }
 
 .detach-button:hover {
     background-color: #c9302c;
+}
+
+.account-dropdown {
+    padding: 10px;
+    border: 1px solid #4CAF50;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    font-size: 14px;
+    color: #333;
+    width: 15%;
 }

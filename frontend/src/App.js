@@ -19,7 +19,7 @@ function App() {
                         <Route path="/transactions" element={<TransactionsTable />} />
                         <Route path="/expense-uploader" element={<ExpenseUploader />} />
                         <Route path="/expenses" element={<h2 className="error-message">Expenses page coming soon!</h2>} />
-                        <Route path="*" element={<h2 className="error-message">Page not found</h2>} />
+                        <Route path="*" element={<h2 className="error-message">Finance App</h2>} />
                     </Routes>
                 </div>
             </div>

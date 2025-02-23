@@ -60,7 +60,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
                         date: row['Transaction Date'],
                         amount: row['Amount'],
                         category: row['Category'],
-                        subcategory: row['Subcategory'] || 'UNSET',
+                        subcategory: row['Subcategory'] || 'Unselected',
                         description: row['Description'],
                     };
                 }).filter(expense => expense !== null);

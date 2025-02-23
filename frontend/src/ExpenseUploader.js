@@ -9,8 +9,12 @@ const ExpenseUploader = () => {
     const handleFileChange = (e) => {
         if (e.target.files.length > 0) {
             setFile(e.target.files[0]);
-            setShowFileInfo(true);
         }
+    };
+
+    const handleAccountSelection = (value) => {
+        console.log('Selected account:', value);
+        setShowFileInfo(value);
     };
 
     const handleUpload = () => {
@@ -58,10 +62,17 @@ const ExpenseUploader = () => {
                         Choose File
                     </label>
                 ) : (
-                    <div className={`file-info ${showFileInfo ? 'show' : 'fade-out'}`}>
-                        <p>{file.name}</p>
-                        <button onClick={handleUpload} className="upload-button">Upload</button>
-                        <button onClick={handleDetach} className="detach-button">Detach</button>
+                    <div className="file-info-container">
+                        <div className='file-info'>
+                            <label>{file.name}</label>
+                            <button onClick={handleUpload} className={`upload-button ${showFileInfo ? 'show' : 'hide'}`}>Upload</button>
+                            <button onClick={handleDetach} className={`detach-button ${showFileInfo ? 'show' : 'hide'}`}>Detach</button>
+                        </div>
+                        <select className='account-dropdown' onChange={(e) => handleAccountSelection(e.target.value)}>
+                            <option value="Select">Select an account...</option>
+                            <option value="Chase Credit">Chase Credit</option>
+                            <option value="Chase Checking">Chase Checking</option>
+                        </select>
                     </div>
                 )}
             </div>
