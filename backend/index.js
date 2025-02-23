@@ -59,6 +59,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
             complete: async (results) => {
                 const parsedData = results.data;
                 const expenses = null;
+                console.log(account);
                 switch (account) {
                     case 'Chase Credit': {
                         expenses = parsedData.map(row => {
@@ -124,6 +125,17 @@ app.post('/upload', upload.single('file'), async (req, res) => {
         console.error('Error processing file:', err);
         res.status(500).json({ error: 'Error processing file' });
     }
+});
+
+app.delete('/expenses', (req, res) => {
+    // Your code to delete all records from the database
+    pool.query('DELETE FROM expenses', (err, result) => {
+        if (err) {
+            res.status(500).send('Error deleting expenses');
+        } else {
+            res.status(200).send('All expenses deleted');
+        }
+    });
 });
 
 // Save expenses to the database

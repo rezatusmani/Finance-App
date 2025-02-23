@@ -101,6 +101,22 @@ const TransactionsTable = () => {
         }));
     };
 
+    // Handle the "Delete All" button click
+    const handleDeleteAll = async () => {
+        const confirmation = window.confirm('Are you sure you want to delete all expenses?');
+        if (confirmation) {
+            try {
+                await axios.delete('http://localhost:5000/expenses');  // Send delete request to backend
+                setExpenses([]);
+                setFilteredExpenses([]);
+                alert('All expenses have been deleted successfully.');
+            } catch (error) {
+                console.error('Error deleting all expenses:', error);
+                alert('An error occurred while deleting the expenses.');
+            }
+        }
+    };
+
     // Apply filters to the expenses
     useEffect(() => {
         const filtered = expenses.filter((expense) => {
@@ -349,6 +365,10 @@ const TransactionsTable = () => {
                     )}
                 </tbody>
             </table>
+
+            <button onClick={handleDeleteAll} className="delete-btn">
+                Delete All
+            </button>
         </div>
     );
 };

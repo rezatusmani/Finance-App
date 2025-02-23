@@ -5,7 +5,6 @@ table {
     overflow-x: auto; /* Enable horizontal scrolling */
     overflow-y: auto; /* Enable vertical scrolling */
     border-collapse: collapse; /* Ensure borders collapse to avoid gaps */
-    margin-bottom: 20px;
     border: 1px solid #ccc;
 }
 
@@ -136,4 +135,23 @@ td input[type="text"] {
     transition: transform 0.3s;
     font-size: 14px;
     margin-left: 8px;
+}
+
+/* Style for the delete button */
+.delete-btn {
+    background-color: red;
+    border: 1px solid #ccc;
+    padding: 10px 10px;
+    font-size: 14px;
+    cursor: pointer;
+    display: block;
+    width: auto;
+    color: white;
+    text-transform: uppercase;
+    font-weight: bold;    
+}
+
+.delete-btn:hover {
+    background-color: darkred;
+    transition: all 0.3s;
 }
