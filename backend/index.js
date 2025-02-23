@@ -60,7 +60,15 @@ app.post('/upload', upload.single('file'), async (req, res) => {
                         date: row['Transaction Date'],
                         amount: row['Amount'],
                         category: row['Category'],
-                        subcategory: row['Subcategory'] || 'Unselected',
+                        subcategory: row['Subcategory'] ||
+                            category === 'Food & Drink' ? 'Wants' :
+                            category === 'Entertainment' ? 'Wants' :
+                            category === 'Groceries' ? 'Needs' :
+                            category === 'Gas' ? 'Needs' :
+                            category === 'Home' ? 'Needs' :
+                            category === 'Health & Wellness' ? 'Needs' :
+                            category === 'Automotive' ? 'Needs' :
+                        'Unselected',
                         description: row['Description'],
                     };
                 }).filter(expense => expense !== null);
