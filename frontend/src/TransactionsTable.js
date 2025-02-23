@@ -239,7 +239,7 @@ const TransactionsTable = () => {
                                 <td>{decodeHTML(expense.category)}</td>
                                 <td>
                                     <select value={expense.subcategory} className="subcategory-dropdown" onChange={(e) => handleSubcategoryChange(expense.id, e, e.target.value)}>
-                                        <option value="UNSET">Select a subcategory...</option>
+                                        <option value="Unselected">Select a subcategory...</option>
                                         <option value="Needs">Needs</option>
                                         <option value="Wants">Wants</option>
                                         <option value="Savings">Savings</option>

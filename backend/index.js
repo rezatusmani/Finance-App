@@ -61,13 +61,13 @@ app.post('/upload', upload.single('file'), async (req, res) => {
                         amount: row['Amount'],
                         category: row['Category'],
                         subcategory: row['Subcategory'] ||
-                            category === 'Food & Drink' ? 'Wants' :
-                            category === 'Entertainment' ? 'Wants' :
-                            category === 'Groceries' ? 'Needs' :
-                            category === 'Gas' ? 'Needs' :
-                            category === 'Home' ? 'Needs' :
-                            category === 'Health & Wellness' ? 'Needs' :
-                            category === 'Automotive' ? 'Needs' :
+                            row['Category'] === 'Food & Drink' ? 'Wants' :
+                            row['Category'] === 'Entertainment' ? 'Wants' :
+                            row['Category'] === 'Groceries' ? 'Needs' :
+                            row['Category'] === 'Gas' ? 'Needs' :
+                            row['Category'] === 'Home' ? 'Needs' :
+                            row['Category'] === 'Health & Wellness' ? 'Needs' :
+                            row['Category'] === 'Automotive' ? 'Needs' :
                         'Unselected',
                         description: row['Description'],
                     };
@@ -97,19 +97,16 @@ const saveToDatabase = async (expenses) => {
 
     for (const expense of expenses) {
         try {
-            // Ensure the amount is positive
-            const positiveAmount = Math.abs(expense.amount);
-
             const checkQuery = 'SELECT * FROM expenses WHERE amount = $1 AND date = $2 AND description = $3';
             const result = await pool.query(checkQuery, [
-                positiveAmount, // Use the positive amount
+                expense.amount, 
                 expense.date,
                 expense.description
             ]);
 
             if (result.rows.length === 0) {
                 await pool.query(query, [
-                    positiveAmount, // Use the positive amount
+                    expense.amount, 
                     expense.category,
                     expense.subcategory,
                     expense.date,
