@@ -59,6 +59,9 @@ app.post('/upload', upload.single('file'), async (req, res) => {
             complete: async (results) => {
                 const parsedData = results.data;
                 const expenses = parsedData.map(row => {
+                    if (!row['Description'] || !row['Amount'] || !row['Transaction Date']) {
+                        return null;
+                    }
                     return {
                         date: row['Transaction Date'],
                         amount: row['Amount'],

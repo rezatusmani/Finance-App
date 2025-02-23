@@ -20,7 +20,8 @@ const decodeHTML = (html) => {
 
 // Function to format the amount as a dollar amount
 const formatAmount = (amount) => {
-    return `$${parseFloat(amount).toFixed(2)}`; // Ensure the amount is a number and show two decimal places
+    const num = parseFloat(amount).toFixed(2);
+    return num.startsWith('-') ? `-$${num.slice(1)}` : `$${num}`;
 };
 
 const TransactionsTable = () => {
