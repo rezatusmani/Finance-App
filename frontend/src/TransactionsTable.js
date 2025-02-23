@@ -91,13 +91,6 @@ const TransactionsTable = () => {
         setFilteredExpenses(filtered);
     }, [filters, expenses]);
 
-    const handleNoteChange = (id, event) => {
-        const updatedExpenses = expenses.map(expense => 
-            expense.id === id ? { ...expense, notes: event.target.value } : expense
-        );
-        setExpenses(updatedExpenses); // Update the state with new note value
-    };
-
     const handleSubcategoryChange = async (id, event, subcategory) => {
         const updatedExpenses = expenses.map(expense => 
             expense.id === id ? { ...expense, subcategory: event.target.value } : expense
@@ -112,9 +105,15 @@ const TransactionsTable = () => {
         }
     };
 
+    const handleNoteChange = (id, event) => {
+        const updatedExpenses = filteredExpenses.map(expense =>
+            expense.id === id ? { ...expense, notes: event.target.value } : expense
+        );
+        setFilteredExpenses(updatedExpenses); // Update only filtered expenses
+    };
+    
     const handleNoteBlur = async (id, notes) => {
         try {
-            // Send the updated note to the backend
             await axios.put(`http://localhost:5000/expenses/${id}`, { notes });
             console.log('Notes updated successfully');
         } catch (error) {
@@ -222,7 +221,7 @@ const TransactionsTable = () => {
             <table>
                 <thead>
                     <tr>
-                        {['date', 'description', 'category', 'subcategory', 'amount', 'notes'].map((column) => (
+                        {['account', 'date', 'description', 'category', 'subcategory', 'amount', 'notes'].map((column) => (
                             <th key={column} onClick={() => handleSort(column)}>
                                 {column.charAt(0).toUpperCase() + column.slice(1)}
                                 {sortConfig.key === column ? (sortConfig.direction === 'asc' ? ' ▲' : ' ▼') : ''}
@@ -234,6 +233,7 @@ const TransactionsTable = () => {
                     {sortedExpenses.length > 0 ? (
                         sortedExpenses.map((expense, index) => (
                             <tr key={index}>
+                                <td>{expense.account}</td>
                                 <td>{formatDate(expense.date)}</td>
                                 <td>{decodeHTML(expense.description)}</td>
                                 <td>{decodeHTML(expense.category)}</td>

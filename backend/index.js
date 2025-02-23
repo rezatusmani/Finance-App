@@ -43,6 +43,12 @@ app.post('/upload', upload.single('file'), async (req, res) => {
         return res.status(400).json({ error: 'No file uploaded' });
     }
 
+    const { account } = req.body; // Extract account from request
+
+    if (!account) {
+        return res.status(400).json({ error: 'Account selection is required' });
+    }
+
     try {
         const filePath = path.join(__dirname, 'uploads', req.file.filename);
         const fileContent = fs.readFileSync(filePath, 'utf8');
@@ -58,15 +64,16 @@ app.post('/upload', upload.single('file'), async (req, res) => {
                         amount: row['Amount'],
                         category: row['Category'] || 'Payment',
                         subcategory: row['Subcategory'] ||
-                            row['Category'] === 'Food & Drink' ? 'Wants' :
+                            (row['Category'] === 'Food & Drink' ? 'Wants' :
                             row['Category'] === 'Entertainment' ? 'Wants' :
                             row['Category'] === 'Groceries' ? 'Needs' :
                             row['Category'] === 'Gas' ? 'Needs' :
                             row['Category'] === 'Home' ? 'Needs' :
                             row['Category'] === 'Health & Wellness' ? 'Needs' :
                             row['Category'] === 'Automotive' ? 'Needs' :
-                        'Unselected',
+                            'Unselected'),
                         description: row['Description'],
+                        account: account // Add selected account
                     };
                 }).filter(expense => expense !== null);
 
@@ -90,7 +97,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
 
 // Save expenses to the database
 const saveToDatabase = async (expenses) => {
-    const query = 'INSERT INTO expenses (amount, category, subcategory, date, description, notes) VALUES ($1, $2, $3, $4, $5, $6)';
+    const query = 'INSERT INTO expenses (amount, category, subcategory, date, description, notes, account) VALUES ($1, $2, $3, $4, $5, $6, $7)';
 
     for (const expense of expenses) {
         try {
@@ -109,6 +116,7 @@ const saveToDatabase = async (expenses) => {
                     expense.date,
                     expense.description,
                     expense.notes || '',  // Default to empty string if no notes
+                    expense.account,
                 ]);
             }
         } catch (error) {
