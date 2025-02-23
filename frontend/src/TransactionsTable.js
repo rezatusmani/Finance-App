@@ -275,7 +275,7 @@ const TransactionsTable = () => {
                     <div className='filter-module'>
                         <h4>Subcategory</h4>
                         <div className="checkbox-group">
-                            {Array.from(new Set(expenses.map((expense) => expense.subcategory))).map((subcategory) => (
+                            {Array.from(new Set(expenses.map((expense) => expense.subcategory))).filter(Boolean).map((subcategory) => (
                                 <label key={subcategory}>
                                     <input
                                         type="checkbox"

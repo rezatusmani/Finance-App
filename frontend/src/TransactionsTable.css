@@ -90,13 +90,14 @@ td input[type="text"] {
 /* Style for filter labels */
 .filter-module {
     padding: 0 10px;
-    max-width: 11%;
-    height: 150px;
+    max-width: 12%;
+    height: 220px;
 }
 
 /* Checkboxes for categories */
 .checkbox-group {
-    max-height: 95px;
+    max-height: 65%;
+    width: 98%;
     overflow: auto;
     display: flex;
     flex-direction: column; /* Stack checkboxes vertically */
@@ -140,6 +141,7 @@ td input[type="text"] {
 
 /* Style for the delete button */
 .delete-btn {
+    margin-top: 10px;
     background-color: red;
     border: 1px solid #ccc;
     padding: 10px 10px;
@@ -149,7 +151,7 @@ td input[type="text"] {
     width: auto;
     color: white;
     text-transform: uppercase;
-    font-weight: bold;    
+    font-weight: bold;
 }
 
 .delete-btn:hover {
