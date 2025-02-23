@@ -58,28 +58,56 @@ app.post('/upload', upload.single('file'), async (req, res) => {
             dynamicTyping: true,
             complete: async (results) => {
                 const parsedData = results.data;
-                const expenses = parsedData.map(row => {
-                    if (!row['Description'] || !row['Amount'] || !row['Transaction Date']) {
-                        return null;
+                const expenses = null;
+                switch (account) {
+                    case 'Chase Credit': {
+                        expenses = parsedData.map(row => {
+                            if (!row['Description'] || !row['Amount'] || !row['Transaction Date']) {
+                                return null;
+                            }
+                            return {
+                                date: row['Transaction Date'],
+                                amount: row['Amount'],
+                                category: row['Category'] || 'Transfer',
+                                subcategory: row['Subcategory'] ||
+                                    (row['Category'].toLowerCase().contains('Food & Drink'.toLowerCase()) ? 'Wants' :
+                                    row['Category'].toLowerCase().contains('Entertainment'.toLowerCase()) ? 'Wants' :
+                                    row['Category'].toLowerCase().contains('Groceries'.toLowerCase()) ? 'Needs' :
+                                    row['Category'].toLowerCase().contains('Gas'.toLowerCase()) ? 'Needs' :
+                                    row['Category'].toLowerCase().contains('Home'.toLowerCase()) ? 'Needs' :
+                                    row['Category'].toLowerCase().contains('Health & Wellness'.toLowerCase()) ? 'Needs' :
+                                    row['Category'].toLowerCase().contains('Automotive'.toLowerCase()) ? 'Needs' :
+                                    'Unselected'),
+                                description: row['Description'],
+                                account: account
+                            };
+                        }).filter(expense => expense !== null);
+                        break;
                     }
-                    return {
-                        date: row['Transaction Date'],
-                        amount: row['Amount'],
-                        category: row['Category'] || 'Payment',
-                        subcategory: row['Subcategory'] ||
-                            (row['Category'] === 'Food & Drink' ? 'Wants' :
-                            row['Category'] === 'Entertainment' ? 'Wants' :
-                            row['Category'] === 'Groceries' ? 'Needs' :
-                            row['Category'] === 'Gas' ? 'Needs' :
-                            row['Category'] === 'Home' ? 'Needs' :
-                            row['Category'] === 'Health & Wellness' ? 'Needs' :
-                            row['Category'] === 'Automotive' ? 'Needs' :
-                            'Unselected'),
-                        description: row['Description'],
-                        account: account // Add selected account
-                    };
-                }).filter(expense => expense !== null);
-
+                    case 'Chase Checking': {
+                        expenses = parsedData.map(row => {
+                            if (!row['Description'] || !row['Amount'] || !row['Posting Date']) {
+                                return null;
+                            }
+                            return {
+                                date: row['Posting Date'],
+                                amount: row['Amount'],
+                                category: row['Category'] || 'Payment',
+                                subcategory: row['Subcategory'] ||
+                                    (row['Description'].toLowerCase().contains('LENDINGCLUB'.toLowerCase()) ? 'Savings' :
+                                    row['Description'].toLowerCase().contains('VANGUARD'.toLowerCase()) ? 'Savings' :
+                                    row['Description'].toLowerCase().contains('COOPER POWER'.toLowerCase()) ? 'Income' :
+                                    row['Description'].toLowerCase().contains('ANYTIME FIT'.toLowerCase()) ? 'Needs' :
+                                    row['Description'].toLowerCase().contains('VERIZON WIRELESS PAYMENTS'.toLowerCase()) ? 'Needs' :
+                                    row['Description'].toLowerCase().contains('Payment to Chase card ending in'.toLowerCase()) ? 'Transfer' :
+                                    'Unselected'),
+                                description: row['Description'],
+                                account: account
+                            };
+                        }).filter(expense => expense !== null);
+                        break;                    
+                    }
+                }
                 if (expenses.length > 0) {
                     await saveToDatabase(expenses);
                     res.status(200).json(expenses);

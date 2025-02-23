@@ -327,6 +327,8 @@ const TransactionsTable = () => {
                                         <option value="Needs">Needs</option>
                                         <option value="Wants">Wants</option>
                                         <option value="Savings">Savings</option>
+                                        <option value="Income">Income</option>
+                                        <option value="Transfer">Transfer</option>
                                     </select>
                                 </td>
                                 <td>{formatAmount(expense.amount)}</td>
