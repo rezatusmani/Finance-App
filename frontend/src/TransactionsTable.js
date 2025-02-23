@@ -29,9 +29,11 @@ const TransactionsTable = () => {
     const [filters, setFilters] = useState({
         category: [],
         subcategory: [],
-        description: ''
+        description: '',
+        notes: ''
     });
     const [sortConfig, setSortConfig] = useState({ key: 'date', direction: 'desc' });
+    const [filtersVisible, setFiltersVisible] = useState(false);  // New state for toggling visibility
 
     // Fetch expenses when the component mounts
     useEffect(() => {
@@ -67,14 +69,23 @@ const TransactionsTable = () => {
         }));
     };
 
+    // Handle description text search
+    const handleNotesChange = (event) => {
+        setFilters((prevFilters) => ({
+            ...prevFilters,
+            notes: event.target.value
+        }));
+    };
+
     // Apply filters to the expenses
     useEffect(() => {
         const filtered = expenses.filter((expense) => {
             const matchesCategory = filters.category.length === 0 || filters.category.includes(expense.category);
             const matchesSubcategory = filters.subcategory.length === 0 || filters.subcategory.includes(expense.subcategory);
             const matchesDescription = filters.description === '' || decodeHTML(expense.description).toLowerCase().includes(filters.description.toLowerCase());
+            const matchesNotes = filters.notes === '' || decodeHTML(expense.notes).toLowerCase().includes(filters.notes.toLowerCase());
 
-            return matchesCategory && matchesSubcategory && matchesDescription;
+            return matchesCategory && matchesSubcategory && matchesDescription && matchesNotes;
         });
 
         setFilteredExpenses(filtered);
@@ -139,56 +150,80 @@ const TransactionsTable = () => {
         return 0;
     });
 
+    // Toggle the filter visibility
+    const toggleFilters = () => {
+        setFiltersVisible(!filtersVisible);
+    };
+
     return (
         <div>
-            <div className="filters">
-                <div className='filter-module'>
-                    <h4>Categories</h4>
-                    <div className="checkbox-group">
-                        {Array.from(new Set(expenses.map((expense) => expense.category))).map((category) => (
-                            <label key={category}>
-                                <input
-                                    type="checkbox"
-                                    value={category}
-                                    onChange={(e) => handleFilterChange(e, 'category')}
-                                />
-                                {category}
-                            </label>
-                        ))}
-                    </div>
-                </div>
-                <div className='filter-module'>
-                    <h4>Subcategories</h4>
-                    <div className="checkbox-group">
-                    {Array.from(new Set(expenses.map((expense) => expense.subcategory))).map((subcategory) => (
-                            <label key={subcategory}>
-                                <input
-                                    type="checkbox"
-                                    value={subcategory}
-                                    onChange={(e) => handleFilterChange(e, 'subcategory')}
-                                />
-                                {subcategory}
-                            </label>
-                        ))}
-                    </div>
-                </div>
-                <div className='filter-module'>
-                    <h4>Descriptions</h4>
-                    <input
-                        type="text"
-                        className="description-input"
-                        placeholder="Search descriptions"
-                        value={filters.description}
-                        onChange={handleDescriptionChange}
-                    />
-                </div>
+            <div className="filters-header" onClick={toggleFilters} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                <h4>Filters</h4>
+                <span style={{transform: filtersVisible ? 'rotate(90deg)' : 'rotate(0deg)'}}>
+                    {'▶'}
+                </span>
             </div>
+
+            {filtersVisible && (
+                <div className="filters">
+                    <div className='filter-module'>
+                        <h4>Categories</h4>
+                        <div className="checkbox-group">
+                            {Array.from(new Set(expenses.map((expense) => expense.category))).map((category) => (
+                                <label key={category}>
+                                    <input
+                                        type="checkbox"
+                                        value={category}
+                                        onChange={(e) => handleFilterChange(e, 'category')}
+                                    />
+                                    {category}
+                                </label>
+                            ))}
+                        </div>
+                    </div>
+                    <div className='filter-module'>
+                        <h4>Subcategories</h4>
+                        <div className="checkbox-group">
+                            {Array.from(new Set(expenses.map((expense) => expense.subcategory))).map((subcategory) => (
+                                <label key={subcategory}>
+                                    <input
+                                        type="checkbox"
+                                        value={subcategory}
+                                        onChange={(e) => handleFilterChange(e, 'subcategory')}
+                                    />
+                                    {subcategory}
+                                </label>
+                            ))}
+                        </div>
+                    </div>
+                    <div className='filter-module'>
+                        <h4>Descriptions</h4>
+                        <input
+                            type="text"
+                            className="filter-input"
+                            placeholder="Search descriptions"
+                            value={filters.description}
+                            onChange={handleDescriptionChange}
+                        />
+                    </div>
+                    <div className='filter-module'>
+                        <h4>Notes</h4>
+                        <input
+                            type="text"
+                            className="filter-input"
+                            placeholder="Search notes"
+                            value={filters.notes}
+                            onChange={handleNotesChange}
+                        />
+                    </div>
+                </div>
+            )}
 
             <table>
                 <thead>
                     <tr>
                         {['date', 'description', 'category', 'subcategory', 'amount', 'notes'].map((column) => (
-                            <th key={column} onClick={() => handleSort(column)} style={{ cursor: 'pointer' }}>
+                            <th key={column} onClick={() => handleSort(column)}>
                                 {column.charAt(0).toUpperCase() + column.slice(1)}
                                 {sortConfig.key === column ? (sortConfig.direction === 'asc' ? ' ▲' : ' ▼') : ''}
                             </th>
@@ -204,7 +239,7 @@ const TransactionsTable = () => {
                                 <td>{decodeHTML(expense.category)}</td>
                                 <td>
                                     <select value={expense.subcategory} className="subcategory-dropdown" onChange={(e) => handleSubcategoryChange(expense.id, e, e.target.value)}>
-                                        <option value="Unselected">Select a subcategory...</option>
+                                        <option value="UNSET">Select a subcategory...</option>
                                         <option value="Needs">Needs</option>
                                         <option value="Wants">Wants</option>
                                         <option value="Savings">Savings</option>

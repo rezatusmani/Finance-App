@@ -6,6 +6,7 @@ table {
     overflow-y: auto; /* Enable vertical scrolling */
     border-collapse: collapse; /* Ensure borders collapse to avoid gaps */
     margin-bottom: 20px;
+    border: 1px solid #ccc;
 }
 
 /* Table headers and cells */
@@ -21,6 +22,7 @@ th {
     color: white;
     font-weight: bold;
     text-transform: uppercase; /* Capitalize header text */
+    cursor: pointer;
 }
 
 /* Zebra striping for rows */
@@ -38,7 +40,7 @@ td {
 }
 
 /* Notes input field styling */
-td input[type="text"], td .description-input {
+td input[type="text"] {
     padding: 10px;
     border: 1px solid #4CAF50;
     border-radius: 5px;
@@ -47,11 +49,6 @@ td input[type="text"], td .description-input {
     color: #333;
     width: 100%;
     box-sizing: border-box; /* Ensure padding doesn't break layout */
-}
-
-td input[type="text"]:focus, td .description-input:focus {
-    background-color: #fff;
-    outline: none; /* Remove default browser outline */
 }
 
 /* Subcategory dropdown styling */
@@ -95,7 +92,7 @@ td input[type="text"]:focus, td .description-input:focus {
 
 /* Style for filter labels */
 .filter-module {
-    padding: 10px;
+    padding: 0 10px;
 }
 
 /* Checkboxes for categories */
@@ -107,4 +104,24 @@ td input[type="text"]:focus, td .description-input:focus {
 
 .checkbox-group input {
     margin-right: 5px;
+}
+
+.filters-header {
+    background-color: #4CAF50;
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+    border: 1px solid #ccc;
+    max-height: 39px;
+}
+
+.filters-header h4 {
+    padding-left: 10px;
+    font-size: 14px;
+}
+
+.filters-header span {
+    transition: transform 0.3s;
+    font-size: 14px;
+    margin-left: 8px;
 }
