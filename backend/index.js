@@ -58,8 +58,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
             dynamicTyping: true,
             complete: async (results) => {
                 const parsedData = results.data;
-                const expenses = null;
-                console.log(account);
+                let expenses = null;
                 switch (account) {
                     case 'Chase Credit': {
                         expenses = parsedData.map(row => {
@@ -70,15 +69,16 @@ app.post('/upload', upload.single('file'), async (req, res) => {
                                 date: row['Transaction Date'],
                                 amount: row['Amount'],
                                 category: row['Category'] || 'Transfer',
-                                subcategory: row['Subcategory'] ||
-                                    (row['Category'].toLowerCase().contains('Food & Drink'.toLowerCase()) ? 'Wants' :
-                                    row['Category'].toLowerCase().contains('Entertainment'.toLowerCase()) ? 'Wants' :
-                                    row['Category'].toLowerCase().contains('Groceries'.toLowerCase()) ? 'Needs' :
-                                    row['Category'].toLowerCase().contains('Gas'.toLowerCase()) ? 'Needs' :
-                                    row['Category'].toLowerCase().contains('Home'.toLowerCase()) ? 'Needs' :
-                                    row['Category'].toLowerCase().contains('Health & Wellness'.toLowerCase()) ? 'Needs' :
-                                    row['Category'].toLowerCase().contains('Automotive'.toLowerCase()) ? 'Needs' :
-                                    'Unselected'),
+                                subcategory: (row['Category'] && row['Description'] &&
+                                    (row['Category'].toLowerCase().includes('Food & Drink'.toLowerCase()) ? 'Wants' :
+                                    row['Category'].toLowerCase().includes('Entertainment'.toLowerCase()) ? 'Wants' :
+                                    row['Category'].toLowerCase().includes('Groceries'.toLowerCase()) ? 'Needs' :
+                                    row['Category'].toLowerCase().includes('Gas'.toLowerCase()) ? 'Needs' :
+                                    row['Category'].toLowerCase().includes('Home'.toLowerCase()) ? 'Needs' :
+                                    row['Category'].toLowerCase().includes('Health & Wellness'.toLowerCase()) ? 'Needs' :
+                                    row['Category'].toLowerCase().includes('Automotive'.toLowerCase()) ? 'Needs' :
+                                    row['Description'].toLowerCase().includes('Payment Thank You'.toLowerCase()) ? 'Transfer' :
+                                    'Unselected')),
                                 description: row['Description'],
                                 account: account
                             };
@@ -93,15 +93,15 @@ app.post('/upload', upload.single('file'), async (req, res) => {
                             return {
                                 date: row['Posting Date'],
                                 amount: row['Amount'],
-                                category: row['Category'] || 'Payment',
-                                subcategory: row['Subcategory'] ||
-                                    (row['Description'].toLowerCase().contains('LENDINGCLUB'.toLowerCase()) ? 'Savings' :
-                                    row['Description'].toLowerCase().contains('VANGUARD'.toLowerCase()) ? 'Savings' :
-                                    row['Description'].toLowerCase().contains('COOPER POWER'.toLowerCase()) ? 'Income' :
-                                    row['Description'].toLowerCase().contains('ANYTIME FIT'.toLowerCase()) ? 'Needs' :
-                                    row['Description'].toLowerCase().contains('VERIZON WIRELESS PAYMENTS'.toLowerCase()) ? 'Needs' :
-                                    row['Description'].toLowerCase().contains('Payment to Chase card ending in'.toLowerCase()) ? 'Transfer' :
-                                    'Unselected'),
+                                category: row['Type'] || '',
+                                subcategory: (row['Description'] && 
+                                    (row['Description'].toLowerCase().includes('LENDINGCLUB'.toLowerCase()) ? 'Savings' :
+                                    row['Description'].toLowerCase().includes('VANGUARD'.toLowerCase()) ? 'Savings' :
+                                    row['Description'].toLowerCase().includes('COOPER POWER'.toLowerCase()) ? 'Income' :
+                                    row['Description'].toLowerCase().includes('ANYTIME FIT'.toLowerCase()) ? 'Needs' :
+                                    row['Description'].toLowerCase().includes('VERIZON WIRELESS PAYMENTS'.toLowerCase()) ? 'Needs' :
+                                    row['Description'].toLowerCase().includes('Payment to Chase card ending in'.toLowerCase()) ? 'Transfer' :
+                                    'Unselected')),
                                 description: row['Description'],
                                 account: account
                             };
@@ -171,7 +171,7 @@ const saveToDatabase = async (expenses) => {
 // PUT route to update any field of an expense
 app.put('/expenses/:id', async (req, res) => {
     const { id } = req.params;
-    const updates = req.body; // Ensure the request body contains fields to update
+    const updates = req.body; // Ensure the request body includes fields to update
 
     if (Object.keys(updates).length === 0) {
         return res.status(400).send('No fields provided for update');

@@ -120,6 +120,7 @@ const TransactionsTable = () => {
     // Apply filters to the expenses
     useEffect(() => {
         const filtered = expenses.filter((expense) => {
+            const matchesAccount = filters.account.length === 0 || filters.account.includes(expense.account);
             const matchesCategory = filters.category.length === 0 || filters.category.includes(expense.category);
             const matchesSubcategory = filters.subcategory.length === 0 || filters.subcategory.includes(expense.subcategory);
             const matchesDescription = filters.description === '' || decodeHTML(expense.description).toLowerCase().includes(filters.description.toLowerCase());
@@ -134,7 +135,7 @@ const TransactionsTable = () => {
                 (filters.minAmount === '' || parseFloat(expense.amount) >= parseFloat(filters.minAmount)) &&
                 (filters.maxAmount === '' || parseFloat(expense.amount) <= parseFloat(filters.maxAmount));
 
-            return matchesCategory && matchesSubcategory && matchesDescription && matchesNotes && matchesDate && matchesAmount;
+            return matchesAccount && matchesCategory && matchesSubcategory && matchesDescription && matchesNotes && matchesDate && matchesAmount;
         });
 
         setFilteredExpenses(filtered);

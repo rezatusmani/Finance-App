@@ -10,7 +10,7 @@ table {
 
 /* Table headers and cells */
 th, td {
-    padding: 10px 15px;
+    padding: 10px 13px;
     text-align: left;
     font-size: 14px;
 }
@@ -36,6 +36,7 @@ tr:hover {
 /* Table cell styles */
 td {
     color: #333;
+    min-width: 100px;
 }
 
 /* Notes input field styling */
