@@ -28,10 +28,15 @@ const TransactionsTable = () => {
     const [expenses, setExpenses] = useState([]);
     const [filteredExpenses, setFilteredExpenses] = useState([]);
     const [filters, setFilters] = useState({
+        account: [],
         category: [],
         subcategory: [],
         description: '',
-        notes: ''
+        notes: '',
+        startDate: '',
+        endDate: '',
+        minAmount: '',
+        maxAmount: '',
     });
     const [sortConfig, setSortConfig] = useState({ key: 'date', direction: 'desc' });
     const [filtersVisible, setFiltersVisible] = useState(false);  // New state for toggling visibility
@@ -70,11 +75,29 @@ const TransactionsTable = () => {
         }));
     };
 
-    // Handle description text search
+    // Handle notes text search
     const handleNotesChange = (event) => {
         setFilters((prevFilters) => ({
             ...prevFilters,
             notes: event.target.value
+        }));
+    };
+
+    // Handle date range filter change
+    const handleDateChange = (event) => {
+        const { name, value } = event.target;
+        setFilters((prevFilters) => ({
+            ...prevFilters,
+            [name]: value
+        }));
+    };
+
+    // Handle amount range filter change
+    const handleAmountChange = (event) => {
+        const { name, value } = event.target;
+        setFilters((prevFilters) => ({
+            ...prevFilters,
+            [name]: value
         }));
     };
 
@@ -86,7 +109,16 @@ const TransactionsTable = () => {
             const matchesDescription = filters.description === '' || decodeHTML(expense.description).toLowerCase().includes(filters.description.toLowerCase());
             const matchesNotes = filters.notes === '' || decodeHTML(expense.notes).toLowerCase().includes(filters.notes.toLowerCase());
 
-            return matchesCategory && matchesSubcategory && matchesDescription && matchesNotes;
+            // Date range filter
+            const matchesDate = (!filters.startDate || new Date(expense.date) >= new Date(filters.startDate)) &&
+                                (!filters.endDate || new Date(expense.date) <= new Date(filters.endDate));
+
+            // Amount range filter
+            const matchesAmount = 
+                (filters.minAmount === '' || parseFloat(expense.amount) >= parseFloat(filters.minAmount)) &&
+                (filters.maxAmount === '' || parseFloat(expense.amount) <= parseFloat(filters.maxAmount));
+
+            return matchesCategory && matchesSubcategory && matchesDescription && matchesNotes && matchesDate && matchesAmount;
         });
 
         setFilteredExpenses(filtered);
@@ -123,9 +155,9 @@ const TransactionsTable = () => {
     };
 
     const handleSort = (key) => {
-        let direction = 'asc';
-        if (sortConfig.key === key && sortConfig.direction === 'asc') {
-            direction = 'desc';
+        let direction = 'desc';
+        if (sortConfig.key === key && sortConfig.direction === 'desc') {
+            direction = 'asc';
         }
         setSortConfig({ key, direction });
     };
@@ -158,7 +190,7 @@ const TransactionsTable = () => {
     return (
         <div>
             <div className="filters-header" onClick={toggleFilters} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-                <h4>Filters</h4>
+                <h4>Filter By</h4>
                 <span style={{transform: filtersVisible ? 'rotate(90deg)' : 'rotate(0deg)'}}>
                     {'▶'}
                 </span>
@@ -167,7 +199,49 @@ const TransactionsTable = () => {
             {filtersVisible && (
                 <div className="filters">
                     <div className='filter-module'>
-                        <h4>Categories</h4>
+                        <h4>Account</h4>
+                        <div className="checkbox-group">
+                            {Array.from(new Set(expenses.map((expense) => expense.account))).map((account) => (
+                                <label key={account}>
+                                    <input
+                                        type="checkbox"
+                                        value={account}
+                                        onChange={(e) => handleFilterChange(e, 'account')}
+                                    />
+                                    {account}
+                                </label>
+                            ))}
+                        </div>
+                    </div>
+                    <div className='filter-module'>
+                        <h4>Date</h4>
+                        <input
+                            className='filter-input'
+                            type="date"
+                            name="startDate"
+                            value={filters.startDate}
+                            onChange={handleDateChange}
+                        />
+                        <input
+                            className='filter-input'
+                            type="date"
+                            name="endDate"
+                            value={filters.endDate}
+                            onChange={handleDateChange}
+                        />
+                    </div>
+                    <div className='filter-module'>
+                        <h4>Description</h4>
+                        <input
+                            type="text"
+                            className="filter-input"
+                            placeholder="Search"
+                            value={filters.description}
+                            onChange={handleDescriptionChange}
+                        />
+                    </div>
+                    <div className='filter-module'>
+                        <h4>Category</h4>
                         <div className="checkbox-group">
                             {Array.from(new Set(expenses.map((expense) => expense.category))).map((category) => (
                                 <label key={category}>
@@ -182,7 +256,7 @@ const TransactionsTable = () => {
                         </div>
                     </div>
                     <div className='filter-module'>
-                        <h4>Subcategories</h4>
+                        <h4>Subcategory</h4>
                         <div className="checkbox-group">
                             {Array.from(new Set(expenses.map((expense) => expense.subcategory))).map((subcategory) => (
                                 <label key={subcategory}>
@@ -197,13 +271,22 @@ const TransactionsTable = () => {
                         </div>
                     </div>
                     <div className='filter-module'>
-                        <h4>Descriptions</h4>
+                        <h4>Amount</h4>
                         <input
-                            type="text"
-                            className="filter-input"
-                            placeholder="Search descriptions"
-                            value={filters.description}
-                            onChange={handleDescriptionChange}
+                            className='filter-input'
+                            type="number"
+                            name="minAmount"
+                            placeholder="Min"
+                            value={filters.minAmount}
+                            onChange={handleAmountChange}
+                        />
+                        <input
+                            className='filter-input'
+                            type="number"
+                            name="maxAmount"
+                            placeholder="Max"
+                            value={filters.maxAmount}
+                            onChange={handleAmountChange}
                         />
                     </div>
                     <div className='filter-module'>
@@ -211,7 +294,7 @@ const TransactionsTable = () => {
                         <input
                             type="text"
                             className="filter-input"
-                            placeholder="Search notes"
+                            placeholder="Search"
                             value={filters.notes}
                             onChange={handleNotesChange}
                         />
@@ -259,7 +342,7 @@ const TransactionsTable = () => {
                         ))
                     ) : (
                         <tr>
-                            <td colSpan="6">No expenses to display</td>
+                            <td colSpan="7">No expenses to display</td>
                         </tr>
                     )}
                 </tbody>

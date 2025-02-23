@@ -66,6 +66,7 @@ td input[type="text"] {
 /* Filters section styles */
 .filters {
     display: flex;
+    justify-content: space-between;
     margin-bottom: 20px;
 }
 
@@ -77,29 +78,35 @@ td input[type="text"] {
     background-color: #f9f9f9;
     font-size: 14px;
     color: #333;
-    width: 20%;
+    max-width: 120px;
     box-sizing: border-box;
+    margin-right: 10px;
 }
 
 .filter-input:focus, .filter-dropdown:focus {
     background-color: #fff;
 }
 
-/* Textbox for description search */
-.filter-input {
-    width: 100%;
-}
-
 /* Style for filter labels */
 .filter-module {
     padding: 0 10px;
+    max-width: 11%;
+    height: 150px;
 }
 
 /* Checkboxes for categories */
 .checkbox-group {
+    max-height: 95px;
+    overflow: auto;
     display: flex;
     flex-direction: column; /* Stack checkboxes vertically */
     gap: 5px;
+    border: 1px solid #4CAF50;
+    border-radius: 5px;
+    padding: 5px;
+    background-color: #f9f9f9;
+    font-size: 14px;
+    color: #333;
 }
 
 .checkbox-group input {
@@ -118,6 +125,11 @@ td input[type="text"] {
 .filters-header h4 {
     padding-left: 10px;
     font-size: 14px;
+}
+
+.filter-module h4 {
+    font-size: 14px;
+    margin-bottom: 5px;
 }
 
 .filters-header span {
