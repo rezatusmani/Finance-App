@@ -323,7 +323,7 @@ const TransactionsTable = () => {
                 <thead>
                     <tr>
                         {['account', 'date', 'description', 'category', 'subcategory', 'amount', 'notes'].map((column) => (
-                            <th key={column} onClick={() => handleSort(column)}>
+                            <th key={column} onClick={() => column !== 'notes' ? handleSort(column) : null} style={{ cursor: column !== 'notes' ? 'pointer' : 'default' }}>
                                 {column.charAt(0).toUpperCase() + column.slice(1)}
                                 {sortConfig.key === column ? (sortConfig.direction === 'asc' ? ' ▲' : ' ▼') : ''}
                             </th>

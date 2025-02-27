@@ -21,7 +21,6 @@ th {
     color: white;
     font-weight: bold;
     text-transform: uppercase; /* Capitalize header text */
-    cursor: pointer;
 }
 
 /* Zebra striping for rows */

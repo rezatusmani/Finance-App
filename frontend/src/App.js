@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, } from 'react-router-dom';
 import './App.css';
-import ExpenseUploader from './ExpenseUploader'; // Import ExpenseUploader component
+import StatementUploader from './StatementUploader'; // Import ExpenseUploader component
 import TransactionsTable from './TransactionsTable'; // Import TransactionsTable component
 import Navigation from './Navigation'; // Import Navigation component
 
@@ -17,7 +17,7 @@ function App() {
                 <div className='app-content-container'>
                     <Routes className="app-routes">
                         <Route path="/transactions" element={<TransactionsTable />} />
-                        <Route path="/expense-uploader" element={<ExpenseUploader />} />
+                        <Route path="/statement-uploader" element={<StatementUploader />} />
                         <Route path="/expenses" element={<h2 className="error-message">Expenses page coming soon!</h2>} />
                         <Route path="*" element={<h2 className="error-message">Finance App</h2>} />
                     </Routes>
