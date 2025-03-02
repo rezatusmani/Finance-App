@@ -17,6 +17,11 @@ const Navigation = () => {
                             Statement Uploader
                         </NavLink>
                     </div>
+                    <div className='nav-link-container'>
+                        <NavLink to="/spending-summary" className="nav-link" activeclassname="active">
+                            Spending Summary
+                        </NavLink>
+                    </div>
                 </li>
             </ul>
         </nav>

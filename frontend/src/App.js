@@ -4,6 +4,7 @@ import './App.css';
 import StatementUploader from './StatementUploader'; // Import ExpenseUploader component
 import TransactionsTable from './TransactionsTable'; // Import TransactionsTable component
 import Navigation from './Navigation'; // Import Navigation component
+import SpendingSummary from './SpendingSummary';
 
 function App() {
     return (
@@ -18,6 +19,7 @@ function App() {
                     <Routes className="app-routes">
                         <Route path="/transactions" element={<TransactionsTable />} />
                         <Route path="/statement-uploader" element={<StatementUploader />} />
+                        <Route path="/spending-summary" element={<SpendingSummary />} />
                         <Route path="/expenses" element={<h2 className="error-message">Expenses page coming soon!</h2>} />
                         <Route path="*" element={<h2 className="error-message">Finance App</h2>} />
                     </Routes>

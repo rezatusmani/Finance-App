@@ -1,31 +1,11 @@
 /* Overall table styling */
 table {
-    max-width: 98%;
+    width: 100%;
     background-color: #f9f9f9;
     overflow-x: auto; /* Enable horizontal scrolling */
     overflow-y: auto; /* Enable vertical scrolling */
     border-collapse: collapse; /* Ensure borders collapse to avoid gaps */
-    margin: 1%;
     border: 1px solid #ccc;
-    border-radius: 10px;
-    border-spacing: 0;
-    border-collapse: separate;
-}
-
-table th:first-child {
-    border-top-left-radius: 10px;
-}
-    
-table th:last-child {
-    border-top-right-radius: 10px;
-}
-
-table tr:last-child td:first-child {
-    border-bottom-left-radius: 10px;
-}
-    
-table tr:last-child td:last-child {
-    border-bottom-right-radius: 10px;
 }
 
 /* Table headers and cells */
@@ -60,6 +40,7 @@ td {
 
 /* Notes input field styling */
 td input[type="text"] {
+    padding: 10px;
     border: 1px solid #4CAF50;
     border-radius: 5px;
     background-color: #f9f9f9;
@@ -81,38 +62,41 @@ td input[type="text"] {
     box-sizing: border-box;
 }
 
+/* Filters section styles */
 .filters {
-    transition: all 0.3s ease;
-    width: 98%;
-    margin: 0 1%;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
 }
 
-/* Filters section styles */
-.filters-content {
-    display: flex;
-    justify-content: space-around;
-    border-right: 1px solid #ccc;
-    border-left: 1px solid #ccc;
-    border-bottom: 1px solid #ccc;
-    border-bottom-right-radius: 10px;
-    border-bottom-left-radius: 10px;
-    transition: opacity 0.2s ease-in-out;
+/* Individual filter inputs */
+.filter-input, .filter-dropdown {
+    padding: 10px;
+    border: 1px solid #4CAF50;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    font-size: 14px;
+    color: #333;
+    max-width: 120px;
+    box-sizing: border-box;
+    margin-right: 10px;
+}
+
+.filter-input:focus, .filter-dropdown:focus {
+    background-color: #fff;
 }
 
 /* Style for filter labels */
 .filter-module {
-    min-width: 12%;
-    min-height: 250px;
-}
-
-.filter-module input {
-    margin-bottom: 3%;
-    max-width: 100%;
+    padding: 0 10px;
+    max-width: 12%;
+    height: 220px;
 }
 
 /* Checkboxes for categories */
 .checkbox-group {
-    min-width: 101%;
+    max-height: 65%;
+    width: 98%;
     overflow: auto;
     display: flex;
     flex-direction: column; /* Stack checkboxes vertically */
@@ -136,11 +120,6 @@ td input[type="text"] {
     text-transform: uppercase;
     border: 1px solid #ccc;
     max-height: 39px;
-    width: 98%;
-    margin: 1% 0 0 1%;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-    transition: all 0.3s ease;
 }
 
 .filters-header h4 {

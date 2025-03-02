@@ -206,15 +206,15 @@ const TransactionsTable = () => {
 
     return (
         <div>
-            <div className="filters-header" onClick={toggleFilters} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+            <div className="filters-header" onClick={toggleFilters} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', borderBottomRightRadius: filtersVisible ? '0' : '10px', borderBottomLeftRadius: filtersVisible ? '0' : '10px' }}>
                 <h4>Filter By</h4>
                 <span style={{transform: filtersVisible ? 'rotate(90deg)' : 'rotate(0deg)'}}>
                     {'▶'}
                 </span>
             </div>
 
-            {filtersVisible && (
-                <div className="filters">
+            <div className="filters" style={{ height: filtersVisible ? '250px' : '0'}}>
+                <div className='filters-content' style={{ opacity: filtersVisible ? '1' : '0', transition: filtersVisible ? 'opacity 1.2s ease' : "none" }}>
                     <div className='filter-module'>
                         <h4>Account</h4>
                         <div className="checkbox-group">
@@ -317,8 +317,7 @@ const TransactionsTable = () => {
                         />
                     </div>
                 </div>
-            )}
-
+            </div>
             <table>
                 <thead>
                     <tr>
