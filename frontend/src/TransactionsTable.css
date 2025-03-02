@@ -1,72 +1,89 @@
+.table-container {
+    width: 98%;
+    margin: 1%;
+    border-radius: 10px;
+}
+
 /* Overall table styling */
-table {
-    max-width: 98%;
+.table-container table {
+    width: 100%;
     background-color: #f9f9f9;
     overflow-x: auto; /* Enable horizontal scrolling */
     overflow-y: auto; /* Enable vertical scrolling */
-    border-collapse: collapse; /* Ensure borders collapse to avoid gaps */
-    margin: 1%;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    border-spacing: 0;
-    border-collapse: separate;
+    border-style: hidden!important;
 }
 
-table th:first-child {
+.table-container table th:first-child {
     border-top-left-radius: 10px;
 }
     
-table th:last-child {
+.table-container table th:last-child {
     border-top-right-radius: 10px;
 }
 
-table tr:last-child td:first-child {
+.table-container table tr:last-child td:first-child {
     border-bottom-left-radius: 10px;
 }
     
-table tr:last-child td:last-child {
+.table-container table tr:last-child td:last-child {
     border-bottom-right-radius: 10px;
 }
 
 /* Table headers and cells */
-th, td {
+.table-container th, td {
     padding: 10px 13px;
     text-align: left;
     font-size: 14px;
 }
 
 /* Header styles */
-th {
+.table-header {
     background-color: #4CAF50;
     color: white;
     font-weight: bold;
     text-transform: uppercase; /* Capitalize header text */
+    cursor: default;
 }
 
+/* Header styles */
+.table-header-sortable {
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    text-transform: uppercase; /* Capitalize header text */
+    transition: background-color 0.1s;
+}
+
+.table-header-sortable:hover {
+    background-color: #45a049;
+}
+
+
 /* Zebra striping for rows */
-tr:nth-child(even) {
+.table-container tr:nth-child(even) {
     background-color: #f2f2f2;
 }
 
-tr:hover {
+.table-container tr:hover {
     background-color: #ddd;
 }
 
 /* Table cell styles */
-td {
+.table-container td {
     color: #333;
     min-width: 100px;
 }
 
 /* Notes input field styling */
-td input[type="text"] {
+.table-container td input[type="text"] {
     border: 1px solid #4CAF50;
     border-radius: 5px;
     background-color: #f9f9f9;
     font-size: 14px;
     color: #333;
     width: 100%;
-    box-sizing: border-box; /* Ensure padding doesn't break layout */
+    height: 33px;
 }
 
 /* Type dropdown styling */
@@ -82,38 +99,49 @@ td input[type="text"] {
 }
 
 .filters {
-    transition: all 0.3s ease;
     width: 98%;
     margin: 0 1%;
+    overflow: hidden;
 }
 
 /* Filters section styles */
 .filters-content {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-evenly;
     border-right: 1px solid #ccc;
     border-left: 1px solid #ccc;
     border-bottom: 1px solid #ccc;
     border-bottom-right-radius: 10px;
     border-bottom-left-radius: 10px;
-    transition: opacity 0.2s ease-in-out;
+    transition: all 0.3s ease;
 }
 
 /* Style for filter labels */
 .filter-module {
-    min-width: 12%;
-    min-height: 250px;
+    height: 250px;
 }
 
-.filter-module input {
+/* Style for filter labels */
+.filter-modules-with-inputs {
+    max-width: 10%;
+}
+
+.filter-input {
     margin-bottom: 3%;
-    max-width: 100%;
+    border: 1px solid #4CAF50;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    font-size: 14px;
+    color: #333;
+    box-sizing: border-box; /* Ensure padding doesn't break layout */
+    width: 100%;
+    height: 33px;
 }
 
 /* Checkboxes for categories */
 .checkbox-group {
-    min-width: 101%;
-    overflow: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
     display: flex;
     flex-direction: column; /* Stack checkboxes vertically */
     gap: 5px;
@@ -123,6 +151,7 @@ td input[type="text"] {
     background-color: #f9f9f9;
     font-size: 14px;
     color: #333;
+    max-height: 72%;
 }
 
 .checkbox-group input {
@@ -141,6 +170,11 @@ td input[type="text"] {
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     transition: all 0.3s ease;
+}
+
+.filters-header:hover {
+    background-color: #45a049;
+    transition: all 0.1s ease;
 }
 
 .filters-header h4 {
@@ -172,6 +206,8 @@ td input[type="text"] {
     color: white;
     text-transform: uppercase;
     font-weight: bold;
+    border-radius: 5px;
+    margin: 1%;
 }
 
 .delete-btn:hover {

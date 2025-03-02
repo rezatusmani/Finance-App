@@ -1,153 +1,81 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import './SpendingSummary.css';
 
-// Function to format date as M/D/YY
-const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const month = date.getMonth() + 1; // getMonth() returns 0-11, so add 1
-    const day = date.getDate();
-    const year = date.getFullYear().toString().slice(-2); // Get the last 2 digits of the year
-    return `${month}/${day}/${year}`;
-};
-
-// Decode HTML entities
-const decodeHTML = (html) => {
-    const txt = document.createElement('textarea');
-    txt.innerHTML = html;
-    return txt.value;
-};
-
-// Function to format the amount as a dollar amount
-const formatAmount = (amount) => {
-    const num = parseFloat(amount).toFixed(2);
-    return num.startsWith('-') ? `-$${num.slice(1)}` : `$${num}`;
-};
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042']; // Added a fourth color
 
 const SpendingSummary = () => {
-    const [expenses, setExpenses] = useState([]);
-    const [sortConfig, setSortConfig] = useState({ key: 'date', direction: 'desc' });
+    const [data, setData] = useState([]);
 
-    // Fetch expenses when the component mounts
     useEffect(() => {
-        axios.get('http://localhost:5000/expenses')  // Fetch from your backend
-            .then((response) => {
-                setExpenses(response.data);  // Store in the state
+        // Fetch expenses data from your backend
+        fetch('http://localhost:5000/expenses')
+            .then(response => response.json())
+            .then(expenses => {
+                // Check if expenses data is received correctly
+                console.log('Fetched expenses data:', expenses);
+
+                // Group expenses by type and calculate totals, excluding "Income" and "Transfer" types
+                const totals = expenses.reduce((acc, expense) => {
+                    const { type, amount } = expense;
+
+                    // Exclude "Income" and "Transfer" types
+                    if (type === "Income" || type === "Transfer") {
+                        return acc;
+                    }
+
+                    // Sanitize amount to ensure it's a number
+                    const parsedAmount = parseFloat(amount);
+
+                    // Check for valid number
+                    if (!isNaN(parsedAmount) && parsedAmount !== Infinity && parsedAmount !== -Infinity) {
+                        acc[type] = (acc[type] || 0) + parsedAmount; // No absolute value applied yet
+                    } else {
+                        console.warn(`Invalid amount for ${type}: ${amount}`);
+                    }
+
+                    return acc;
+                }, {});
+
+                console.log('Total expenses by type (excluding Income and Transfer):', totals);
+
+                // Format data for the pie chart, round to 2 decimal places and apply absolute value at the end
+                const formattedData = Object.keys(totals).map((key, index) => ({
+                    name: key,
+                    value: Math.abs(parseFloat(totals[key].toFixed(2))),  // Apply absolute value here
+                    color: COLORS[index % COLORS.length], // Assign colors dynamically
+                }));
+
+                console.log('Formatted chart data:', formattedData);
+
+                setData(formattedData);
             })
-            .catch((error) => {
-                console.error('Error fetching expenses:', error);  // Error handling
-            });
-    }, []);  // This ensures it runs once when the component is mounted
-
-    const handleSubcategoryChange = async (id, event, type) => {
-        const updatedExpenses = expenses.map(expense => 
-            expense.id === id ? { ...expense, type: event.target.value } : expense
-        );
-        setExpenses(updatedExpenses); // Update the state with new type value
-        try {
-            // Send the updated type to the backend
-            await axios.put(`http://localhost:5000/expenses/${id}`, { type });
-            console.log('Subcategory updated successfully to', type);
-        } catch (error) {
-            console.error(`Error updating Subcategory to ${type}:`, error);
-        }
-    };
-
-    const handleNoteChange = (id, event) => {
-        const updatedExpenses = expenses.map(expense =>
-            expense.id === id ? { ...expense, notes: event.target.value } : expense
-        );
-        setExpenses(updatedExpenses);
-    };
-    
-    const handleNoteBlur = async (id, notes) => {
-        try {
-            await axios.put(`http://localhost:5000/expenses/${id}`, { notes });
-            console.log('Notes updated successfully');
-        } catch (error) {
-            console.error('Error updating notes:', error);
-        }
-    };
-
-    const handleSort = (key) => {
-        let direction = 'desc';
-        if (sortConfig.key === key && sortConfig.direction === 'desc') {
-            direction = 'asc';
-        }
-        setSortConfig({ key, direction });
-    };
-
-    const sortedExpenses = [...expenses].sort((a, b) => {
-        let aValue = a[sortConfig.key];
-        let bValue = b[sortConfig.key];
-
-        if (sortConfig.key === 'date') {
-            aValue = new Date(aValue);
-            bValue = new Date(bValue);
-        } else if (sortConfig.key === 'amount') {
-            aValue = parseFloat(aValue);
-            bValue = parseFloat(bValue);
-        } else {
-            aValue = aValue?.toString().toLowerCase();
-            bValue = bValue?.toString().toLowerCase();
-        }
-
-        if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
-        if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
-        return 0;
-    });
+            .catch(error => console.error('Error fetching expenses:', error));
+    }, []);
 
     return (
-        <div>
+        <div className="spending-summary">
             <h2>Spending Summary</h2>
-
-            <table>
-                <thead>
-                    <tr>
-                        {['account', 'date', 'description', 'category', 'type', 'amount', 'notes'].map((column) => (
-                            <th key={column} onClick={() => column !== 'notes' ? handleSort(column) : null} style={{ cursor: column !== 'notes' ? 'pointer' : 'default' }}>
-                                {column.charAt(0).toUpperCase() + column.slice(1)}
-                                {sortConfig.key === column ? (sortConfig.direction === 'asc' ? ' ▲' : ' ▼') : ''}
-                            </th>
+            <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                    <Pie
+                        data={data}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={100}
+                        fill="#8884d8"
+                        label
+                    >
+                        {data.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
-                    </tr>
-                </thead>
-                <tbody>
-                    {sortedExpenses.length > 0 ? (
-                        sortedExpenses.map((expense, index) => (
-                            <tr key={index}>
-                                <td>{expense.account}</td>
-                                <td>{formatDate(expense.date)}</td>
-                                <td>{decodeHTML(expense.description)}</td>
-                                <td>{decodeHTML(expense.category)}</td>
-                                <td>
-                                    <select value={expense.type} className="type-dropdown" onChange={(e) => handleSubcategoryChange(expense.id, e, e.target.value)}>
-                                        <option value="Unselected">Select a type...</option>
-                                        <option value="Needs">Needs</option>
-                                        <option value="Wants">Wants</option>
-                                        <option value="Savings">Savings</option>
-                                        <option value="Income">Income</option>
-                                        <option value="Transfer">Transfer</option>
-                                    </select>
-                                </td>
-                                <td>{formatAmount(expense.amount)}</td>
-                                <td>
-                                    <input
-                                        type="text"
-                                        value={expense.notes || ''}
-                                        onChange={(e) => handleNoteChange(expense.id, e)}
-                                        onBlur={() => handleNoteBlur(expense.id, expense.notes)} // On blur, save note to backend
-                                    />
-                                </td>
-                            </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan="7">No expenses to display</td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                </PieChart>
+            </ResponsiveContainer>
         </div>
     );
 };

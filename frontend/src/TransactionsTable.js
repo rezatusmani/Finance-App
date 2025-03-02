@@ -213,9 +213,9 @@ const TransactionsTable = () => {
                 </span>
             </div>
 
-            <div className="filters" style={{ height: filtersVisible ? '250px' : '0'}}>
-                <div className='filters-content' style={{ opacity: filtersVisible ? '1' : '0', transition: filtersVisible ? 'opacity 1.2s ease' : "none" }}>
-                    <div className='filter-module'>
+            <div className="filters">
+                <div className="filters-content" style={{ height: filtersVisible ? '250px' : '0', opacity: filtersVisible ? '1' : '0' }}>
+                       <div className='filter-module'>
                         <h4>Account</h4>
                         <div className="checkbox-group">
                             {Array.from(new Set(expenses.map((expense) => expense.account))).map((account) => (
@@ -230,7 +230,7 @@ const TransactionsTable = () => {
                             ))}
                         </div>
                     </div>
-                    <div className='filter-module'>
+                    <div className='filter-module filter-modules-with-inputs'>
                         <h4>Date</h4>
                         <input
                             className='filter-input'
@@ -247,7 +247,7 @@ const TransactionsTable = () => {
                             onChange={handleDateChange}
                         />
                     </div>
-                    <div className='filter-module'>
+                    <div className='filter-module filter-modules-with-inputs'>
                         <h4>Description</h4>
                         <input
                             type="text"
@@ -287,7 +287,7 @@ const TransactionsTable = () => {
                             ))}
                         </div>
                     </div>
-                    <div className='filter-module'>
+                    <div className='filter-module filter-modules-with-inputs'>
                         <h4>Amount</h4>
                         <input
                             className='filter-input'
@@ -306,7 +306,7 @@ const TransactionsTable = () => {
                             onChange={handleAmountChange}
                         />
                     </div>
-                    <div className='filter-module'>
+                    <div className='filter-module filter-modules-with-inputs'>
                         <h4>Notes</h4>
                         <input
                             type="text"
@@ -318,53 +318,55 @@ const TransactionsTable = () => {
                     </div>
                 </div>
             </div>
-            <table>
-                <thead>
-                    <tr>
-                        {['account', 'date', 'description', 'category', 'type', 'amount', 'notes'].map((column) => (
-                            <th key={column} onClick={() => column !== 'notes' ? handleSort(column) : null} style={{ cursor: column !== 'notes' ? 'pointer' : 'default' }}>
-                                {column.charAt(0).toUpperCase() + column.slice(1)}
-                                {sortConfig.key === column ? (sortConfig.direction === 'asc' ? ' ▲' : ' ▼') : ''}
-                            </th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody>
-                    {sortedExpenses.length > 0 ? (
-                        sortedExpenses.map((expense, index) => (
-                            <tr key={index}>
-                                <td>{expense.account}</td>
-                                <td>{formatDate(expense.date)}</td>
-                                <td>{decodeHTML(expense.description)}</td>
-                                <td>{decodeHTML(expense.category)}</td>
-                                <td>
-                                    <select value={expense.type} className="type-dropdown" onChange={(e) => handleTypeChange(expense.id, e, e.target.value)}>
-                                        <option value="Unselected">Select a type...</option>
-                                        <option value="Needs">Needs</option>
-                                        <option value="Wants">Wants</option>
-                                        <option value="Savings">Savings</option>
-                                        <option value="Income">Income</option>
-                                        <option value="Transfer">Transfer</option>
-                                    </select>
-                                </td>
-                                <td>{formatAmount(expense.amount)}</td>
-                                <td>
-                                    <input
-                                        type="text"
-                                        value={expense.notes || ''}
-                                        onChange={(e) => handleNoteChange(expense.id, e)}
-                                        onBlur={() => handleNoteBlur(expense.id, expense.notes)} // On blur, save note to backend
-                                    />
-                                </td>
-                            </tr>
-                        ))
-                    ) : (
+            <div className='table-container'>
+                <table>
+                    <thead>
                         <tr>
-                            <td colSpan="7">No expenses to display</td>
+                            {['account', 'date', 'description', 'category', 'type', 'amount', 'notes'].map((column) => (
+                                <th key={column} className={`table-header${column !== 'notes' ? '-sortable' : ''}`} onClick={() => column !== 'notes' ? handleSort(column) : null}>
+                                    {column.charAt(0).toUpperCase() + column.slice(1)}
+                                    {sortConfig.key === column ? (sortConfig.direction === 'asc' ? ' ▲' : ' ▼') : ''}
+                                </th>
+                            ))}
                         </tr>
-                    )}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {sortedExpenses.length > 0 ? (
+                            sortedExpenses.map((expense, index) => (
+                                <tr key={index}>
+                                    <td>{expense.account}</td>
+                                    <td>{formatDate(expense.date)}</td>
+                                    <td>{decodeHTML(expense.description)}</td>
+                                    <td>{decodeHTML(expense.category)}</td>
+                                    <td>
+                                        <select value={expense.type} className="type-dropdown" onChange={(e) => handleTypeChange(expense.id, e, e.target.value)}>
+                                            <option value="Unselected">Select a type...</option>
+                                            <option value="Needs">Needs</option>
+                                            <option value="Wants">Wants</option>
+                                            <option value="Savings">Savings</option>
+                                            <option value="Income">Income</option>
+                                            <option value="Transfer">Transfer</option>
+                                        </select>
+                                    </td>
+                                    <td>{formatAmount(expense.amount)}</td>
+                                    <td>
+                                        <input
+                                            type="text"
+                                            value={expense.notes || ''}
+                                            onChange={(e) => handleNoteChange(expense.id, e)}
+                                            onBlur={() => handleNoteBlur(expense.id, expense.notes)} // On blur, save note to backend
+                                        />
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="7">No expenses to display</td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
 
             <button onClick={handleDeleteAll} className="delete-btn">
                 Delete All

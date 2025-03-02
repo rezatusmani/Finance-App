@@ -95,6 +95,12 @@ app.post('/upload', upload.single('file'), async (req, res) => {
                                 row['Description'].toLowerCase().includes('ANYTIME FIT'.toLowerCase()) ? 'Needs' :
                                 row['Description'].toLowerCase().includes('VERIZON WIRELESS PAYMENTS'.toLowerCase()) ? 'Needs' :
                                 row['Description'].toLowerCase().includes('Payment to Chase card ending in'.toLowerCase()) ? 'Transfer' :
+                                row['Description'].toLowerCase().includes('VENMO'.toLowerCase()) ? 'Transfer' :
+                                row['Description'].toLowerCase().includes('DEPOSIT'.toLowerCase()) ? 'Transfer' :
+                                row['Description'].toLowerCase().includes('Cash Redemption'.toLowerCase()) ? 'Transfer' :
+                                row['Description'].toLowerCase().includes('Zelle'.toLowerCase()) ? 'Transfer' :
+                                row['Description'].toLowerCase().includes('Statement Credit Adjust'.toLowerCase()) ? 'Transfer' :
+                                row['Description'].toLowerCase().includes('Offer:'.toLowerCase()) ? 'Transfer' :
                                 'Unselected')),
                             description: row['Description'],
                             account: "Chase Checking"

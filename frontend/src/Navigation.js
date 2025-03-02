@@ -8,6 +8,11 @@ const Navigation = () => {
             <ul>
                 <li>
                     <div className='nav-link-container'>
+                        <NavLink to="/" className="nav-link" activeclassname="active">
+                            Dashboard
+                        </NavLink>
+                    </div>
+                    <div className='nav-link-container'>
                         <NavLink to="/transactions" className="nav-link" activeclassname="active">
                             All Transactions
                         </NavLink>
