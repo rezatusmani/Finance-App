@@ -69,8 +69,8 @@ td input[type="text"] {
     box-sizing: border-box; /* Ensure padding doesn't break layout */
 }
 
-/* Subcategory dropdown styling */
-.subcategory-dropdown {
+/* Type dropdown styling */
+.type-dropdown {
     padding: 10px;
     border: 1px solid #4CAF50;
     border-radius: 5px;

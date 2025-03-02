@@ -62,7 +62,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
                             date: row['Transaction Date'],
                             amount: row['Amount'],
                             category: row['Category'] || 'Transfer',
-                            subcategory: (
+                            type: (
                                 row['Category'] && (
                                 row['Category'].toLowerCase().includes('Food & Drink'.toLowerCase()) ? 'Wants' :
                                 row['Category'].toLowerCase().includes('Entertainment'.toLowerCase()) ? 'Wants' :
@@ -88,7 +88,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
                             date: row['Posting Date'],
                             amount: row['Amount'],
                             category: row['Type'] || '',
-                            subcategory: (row['Description'] && 
+                            type: (row['Description'] && 
                                 (row['Description'].toLowerCase().includes('LENDINGCLUB'.toLowerCase()) ? 'Savings' :
                                 row['Description'].toLowerCase().includes('VANGUARD'.toLowerCase()) ? 'Savings' :
                                 row['Description'].toLowerCase().includes('COOPER POWER'.toLowerCase()) ? 'Income' :
@@ -135,7 +135,7 @@ app.delete('/expenses', (req, res) => {
 
 // Save expenses to the database
 const saveToDatabase = async (expenses) => {
-    const query = 'INSERT INTO expenses (amount, category, subcategory, date, description, notes, account) VALUES ($1, $2, $3, $4, $5, $6, $7)';
+    const query = 'INSERT INTO expenses (amount, category, type, date, description, notes, account) VALUES ($1, $2, $3, $4, $5, $6, $7)';
     for (const expense of expenses) {
         try {
             const checkQuery = 'SELECT * FROM expenses WHERE amount = $1 AND date = $2 AND description = $3';
@@ -149,7 +149,7 @@ const saveToDatabase = async (expenses) => {
                 await pool.query(query, [
                     expense.amount, 
                     expense.category,
-                    expense.subcategory,
+                    expense.type,
                     expense.date,
                     expense.description,
                     expense.notes || '',  // Default to empty string if no notes

@@ -39,17 +39,17 @@ const SpendingSummary = () => {
             });
     }, []);  // This ensures it runs once when the component is mounted
 
-    const handleSubcategoryChange = async (id, event, subcategory) => {
+    const handleSubcategoryChange = async (id, event, type) => {
         const updatedExpenses = expenses.map(expense => 
-            expense.id === id ? { ...expense, subcategory: event.target.value } : expense
+            expense.id === id ? { ...expense, type: event.target.value } : expense
         );
-        setExpenses(updatedExpenses); // Update the state with new subcategory value
+        setExpenses(updatedExpenses); // Update the state with new type value
         try {
-            // Send the updated subcategory to the backend
-            await axios.put(`http://localhost:5000/expenses/${id}`, { subcategory });
-            console.log('Subcategory updated successfully to', subcategory);
+            // Send the updated type to the backend
+            await axios.put(`http://localhost:5000/expenses/${id}`, { type });
+            console.log('Subcategory updated successfully to', type);
         } catch (error) {
-            console.error(`Error updating Subcategory to ${subcategory}:`, error);
+            console.error(`Error updating Subcategory to ${type}:`, error);
         }
     };
 
@@ -104,7 +104,7 @@ const SpendingSummary = () => {
             <table>
                 <thead>
                     <tr>
-                        {['account', 'date', 'description', 'category', 'subcategory', 'amount', 'notes'].map((column) => (
+                        {['account', 'date', 'description', 'category', 'type', 'amount', 'notes'].map((column) => (
                             <th key={column} onClick={() => column !== 'notes' ? handleSort(column) : null} style={{ cursor: column !== 'notes' ? 'pointer' : 'default' }}>
                                 {column.charAt(0).toUpperCase() + column.slice(1)}
                                 {sortConfig.key === column ? (sortConfig.direction === 'asc' ? ' ▲' : ' ▼') : ''}
@@ -121,8 +121,8 @@ const SpendingSummary = () => {
                                 <td>{decodeHTML(expense.description)}</td>
                                 <td>{decodeHTML(expense.category)}</td>
                                 <td>
-                                    <select value={expense.subcategory} className="subcategory-dropdown" onChange={(e) => handleSubcategoryChange(expense.id, e, e.target.value)}>
-                                        <option value="Unselected">Select a subcategory...</option>
+                                    <select value={expense.type} className="type-dropdown" onChange={(e) => handleSubcategoryChange(expense.id, e, e.target.value)}>
+                                        <option value="Unselected">Select a type...</option>
                                         <option value="Needs">Needs</option>
                                         <option value="Wants">Wants</option>
                                         <option value="Savings">Savings</option>

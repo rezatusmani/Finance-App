@@ -30,7 +30,7 @@ const TransactionsTable = () => {
     const [filters, setFilters] = useState({
         account: [],
         category: [],
-        type: [],
+        subcategory: [],
         description: '',
         notes: '',
         startDate: '',
@@ -122,7 +122,7 @@ const TransactionsTable = () => {
         const filtered = expenses.filter((expense) => {
             const matchesAccount = filters.account.length === 0 || filters.account.includes(expense.account);
             const matchesCategory = filters.category.length === 0 || filters.category.includes(expense.category);
-            const matchesType = filters.type.length === 0 || filters.type.includes(expense.type);
+            const matchesSubcategory = filters.subcategory.length === 0 || filters.subcategory.includes(expense.subcategory);
             const matchesDescription = filters.description === '' || decodeHTML(expense.description).toLowerCase().includes(filters.description.toLowerCase());
             const matchesNotes = filters.notes === '' || decodeHTML(expense.notes).toLowerCase().includes(filters.notes.toLowerCase());
 
@@ -135,23 +135,23 @@ const TransactionsTable = () => {
                 (filters.minAmount === '' || parseFloat(expense.amount) >= parseFloat(filters.minAmount)) &&
                 (filters.maxAmount === '' || parseFloat(expense.amount) <= parseFloat(filters.maxAmount));
 
-            return matchesAccount && matchesCategory && matchesType && matchesDescription && matchesNotes && matchesDate && matchesAmount;
+            return matchesAccount && matchesCategory && matchesSubcategory && matchesDescription && matchesNotes && matchesDate && matchesAmount;
         });
 
         setFilteredExpenses(filtered);
     }, [filters, expenses]);
 
-    const handleTypeChange = async (id, event, type) => {
+    const handleSubcategoryChange = async (id, event, subcategory) => {
         const updatedExpenses = expenses.map(expense => 
-            expense.id === id ? { ...expense, type: event.target.value } : expense
+            expense.id === id ? { ...expense, subcategory: event.target.value } : expense
         );
-        setExpenses(updatedExpenses); // Update the state with new type value
+        setExpenses(updatedExpenses); // Update the state with new subcategory value
         try {
-            // Send the updated type to the backend
-            await axios.put(`http://localhost:5000/expenses/${id}`, { type });
-            console.log('Type updated successfully to', type);
+            // Send the updated subcategory to the backend
+            await axios.put(`http://localhost:5000/expenses/${id}`, { subcategory });
+            console.log('Subcategory updated successfully to', subcategory);
         } catch (error) {
-            console.error(`Error updating Type to ${type}:`, error);
+            console.error(`Error updating Subcategory to ${subcategory}:`, error);
         }
     };
 
@@ -273,16 +273,16 @@ const TransactionsTable = () => {
                         </div>
                     </div>
                     <div className='filter-module'>
-                        <h4>Type</h4>
+                        <h4>Subcategory</h4>
                         <div className="checkbox-group">
-                            {Array.from(new Set(expenses.map((expense) => expense.type))).filter(Boolean).map((type) => (
-                                <label key={type}>
+                            {Array.from(new Set(expenses.map((expense) => expense.subcategory))).filter(Boolean).map((subcategory) => (
+                                <label key={subcategory}>
                                     <input
                                         type="checkbox"
-                                        value={type}
-                                        onChange={(e) => handleFilterChange(e, 'type')}
+                                        value={subcategory}
+                                        onChange={(e) => handleFilterChange(e, 'subcategory')}
                                     />
-                                    {type}
+                                    {subcategory}
                                 </label>
                             ))}
                         </div>
@@ -321,7 +321,7 @@ const TransactionsTable = () => {
             <table>
                 <thead>
                     <tr>
-                        {['account', 'date', 'description', 'category', 'type', 'amount', 'notes'].map((column) => (
+                        {['account', 'date', 'description', 'category', 'subcategory', 'amount', 'notes'].map((column) => (
                             <th key={column} onClick={() => column !== 'notes' ? handleSort(column) : null} style={{ cursor: column !== 'notes' ? 'pointer' : 'default' }}>
                                 {column.charAt(0).toUpperCase() + column.slice(1)}
                                 {sortConfig.key === column ? (sortConfig.direction === 'asc' ? ' ▲' : ' ▼') : ''}
@@ -338,8 +338,8 @@ const TransactionsTable = () => {
                                 <td>{decodeHTML(expense.description)}</td>
                                 <td>{decodeHTML(expense.category)}</td>
                                 <td>
-                                    <select value={expense.type} className="type-dropdown" onChange={(e) => handleTypeChange(expense.id, e, e.target.value)}>
-                                        <option value="Unselected">Select a type...</option>
+                                    <select value={expense.subcategory} className="subcategory-dropdown" onChange={(e) => handleSubcategoryChange(expense.id, e, e.target.value)}>
+                                        <option value="Unselected">Select a subcategory...</option>
                                         <option value="Needs">Needs</option>
                                         <option value="Wants">Wants</option>
                                         <option value="Savings">Savings</option>
