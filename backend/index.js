@@ -37,11 +37,14 @@ app.get('/expenses', async (req, res) => {
     }
 });
 
-// Endpoint for file upload
+// Endpoint for file upload and mapping check
 app.post('/upload', upload.single('file'), async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ error: 'No file uploaded' });
     }
+
+    const mapping = JSON.parse(req.body.mapping);
+    console.log(mapping);
 
     try {
         const filePath = path.join(__dirname, 'uploads', req.file.filename);
@@ -52,64 +55,65 @@ app.post('/upload', upload.single('file'), async (req, res) => {
             dynamicTyping: true,
             complete: async (results) => {
                 const parsedData = results.data;
-                let expenses = null;
-                expenses = parsedData.map(row => {
-                    if ('Transaction Date' in row && 'Post Date' in row && 'Description' in row && 'Category' in row && 'Type' in row && 'Memo' in row && 'Amount' in row) {
-                        if (!row['Description'] || !row['Amount'] || !row['Transaction Date']) {
+
+                // Process the parsed data if the mapping is valid
+                let expenses = parsedData.map(row => {
+                    let expense;
+                    for (const key of mapping.keys)
+                    {
+                        if (!row[key])
                             return null;
-                        }
-                        return {
-                            date: row['Transaction Date'],
-                            amount: row['Amount'],
-                            category: row['Category'] || 'Transfer',
-                            type: (
-                                row['Category'] && (
-                                row['Category'].toLowerCase().includes('Food & Drink'.toLowerCase()) ? 'Wants' :
-                                row['Category'].toLowerCase().includes('Entertainment'.toLowerCase()) ? 'Wants' :
-                                row['Category'].toLowerCase().includes('Groceries'.toLowerCase()) ? 'Needs' :
-                                row['Category'].toLowerCase().includes('Gas'.toLowerCase()) ? 'Needs' :
-                                row['Category'].toLowerCase().includes('Home'.toLowerCase()) ? 'Needs' :
-                                row['Category'].toLowerCase().includes('Health & Wellness'.toLowerCase()) ? 'Needs' :
-                                row['Category'].toLowerCase().includes('Automotive'.toLowerCase()) ? 'Needs' :
-                                'Unselected'
-                                )) || (
-                                row['Description'] && (
-                                row['Description'].toLowerCase().includes('Payment Thank You'.toLowerCase()) ? 'Transfer' :
-                                'Unselected'
-                                )),
-                            description: row['Description'],
-                            account: "Chase Credit"
-                        };
-                    } else if ('Details' in row && 'Posting Date' in row && 'Description' in row && 'Amount' in row && 'Type' in row && 'Balance' in row && 'Check or Slip #' in row) {
-                        if (!row['Description'] || !row['Amount'] || !row['Posting Date']) {
-                            return null;
-                        }
-                        return {
-                            date: row['Posting Date'],
-                            amount: row['Amount'],
-                            category: row['Type'] || '',
-                            type: (row['Description'] && 
-                                (row['Description'].toLowerCase().includes('LENDINGCLUB'.toLowerCase()) ? 'Savings' :
-                                row['Description'].toLowerCase().includes('VANGUARD'.toLowerCase()) ? 'Savings' :
-                                row['Description'].toLowerCase().includes('COOPER POWER'.toLowerCase()) ? 'Income' :
-                                row['Description'].toLowerCase().includes('ANYTIME FIT'.toLowerCase()) ? 'Needs' :
-                                row['Description'].toLowerCase().includes('VERIZON WIRELESS PAYMENTS'.toLowerCase()) ? 'Needs' :
-                                row['Description'].toLowerCase().includes('Payment to Chase card ending in'.toLowerCase()) ? 'Transfer' :
-                                row['Description'].toLowerCase().includes('VENMO'.toLowerCase()) ? 'Transfer' :
-                                row['Description'].toLowerCase().includes('DEPOSIT'.toLowerCase()) ? 'Transfer' :
-                                row['Description'].toLowerCase().includes('Cash Redemption'.toLowerCase()) ? 'Transfer' :
-                                row['Description'].toLowerCase().includes('Zelle'.toLowerCase()) ? 'Transfer' :
-                                row['Description'].toLowerCase().includes('Statement Credit Adjust'.toLowerCase()) ? 'Transfer' :
-                                row['Description'].toLowerCase().includes('Offer:'.toLowerCase()) ? 'Transfer' :
-                                'Unselected')),
-                            description: row['Description'],
-                            account: "Chase Checking"
-                        };
-                    } else {
-                        console.log('Invalid row:', row);
-                        return null;
                     }
+                    console.log("expense");
+                    expense = {
+                        account: mapping.name,
+                        date: row[mapping.map['date']],
+                        amount: row[mapping.map['amount']],
+                        category: row[mapping.map['category']] || " ",
+                        description: row[mapping.map['description']],
+                        type: ''
+                    }
+                    for (const autofillMap of mapping.autofillMaps)
+                    {
+                        if (expense[autofillMap.fillBasedOn] in autofillMap.map)
+                        {
+                            console.log(`filling ${autofillMap.fill}\nbefore: ${expense[autofillMap.fill]} = ${autofillMap.map[expense[autofillMap.fillBasedOn]]}`);
+                            expense[autofillMap.fill] = autofillMap.map[expense[autofillMap.fillBasedOn]];
+                            console.log(`after: ${expense[autofillMap.fill]} = ${autofillMap.map[expense[autofillMap.fillBasedOn]]}\n`);
+                        }
+                    }
+                    return expense;
+                    // } else if ('Details' in row && 'Posting Date' in row && 'Description' in row && 'Amount' in row && 'Type' in row && 'Balance' in row && 'Check or Slip #' in row) {
+                    //     if (!row['Description'] || !row['Amount'] || !row['Posting Date']) {
+                    //         return null;
+                    //     }
+                    //     return {
+                    //         date: row['Posting Date'],
+                    //         amount: row['Amount'],
+                    //         category: row['Type'] || '',
+                    //         type: (row['Description'] && 
+                    //             (row['Description'].toLowerCase().includes('LENDINGCLUB'.toLowerCase()) ? 'Savings' :
+                    //             row['Description'].toLowerCase().includes('VANGUARD'.toLowerCase()) ? 'Savings' :
+                    //             row['Description'].toLowerCase().includes('COOPER POWER'.toLowerCase()) ? 'Income' :
+                    //             row['Description'].toLowerCase().includes('ANYTIME FIT'.toLowerCase()) ? 'Needs' :
+                    //             row['Description'].toLowerCase().includes('VERIZON WIRELESS PAYMENTS'.toLowerCase()) ? 'Needs' :
+                    //             row['Description'].toLowerCase().includes('Payment to Chase card ending in'.toLowerCase()) ? 'Transfer' :
+                    //             row['Description'].toLowerCase().includes('VENMO'.toLowerCase()) ? 'Transfer' :
+                    //             row['Description'].toLowerCase().includes('DEPOSIT'.toLowerCase()) ? 'Transfer' :
+                    //             row['Description'].toLowerCase().includes('Cash Redemption'.toLowerCase()) ? 'Transfer' :
+                    //             row['Description'].toLowerCase().includes('Zelle'.toLowerCase()) ? 'Transfer' :
+                    //             row['Description'].toLowerCase().includes('Statement Credit Adjust'.toLowerCase()) ? 'Transfer' :
+                    //             row['Description'].toLowerCase().includes('Offer:'.toLowerCase()) ? 'Transfer' :
+                    //             'Unselected')),
+                    //         description: row['Description'],
+                    //         account: "Chase Checking"
+                    //     };
+                    // } else {
+                    //     console.log('Invalid row:', row);
+                    //     return null;
+                    // }
                 }).filter(expense => expense !== null);
+
                 if (expenses.length > 0) {
                     await saveToDatabase(expenses);
                     res.status(200).json(expenses);
@@ -126,6 +130,39 @@ app.post('/upload', upload.single('file'), async (req, res) => {
         console.error('Error processing file:', err);
         res.status(500).json({ error: 'Error processing file' });
     }
+});
+
+// POST route for checking the headers of the uploaded file
+app.post('/upload-and-check', (req, res) => {
+    const { headers } = req.body;
+
+    const mappingsFilePath = path.join(__dirname, 'mappings.json');
+
+    fs.readFile(mappingsFilePath, 'utf8', (err, data) => {
+        if (err) {
+            return res.status(500).json({ error: 'Error reading mappings file' });
+        }
+
+        let mappings;
+        try {
+            mappings = JSON.parse(data);
+        } catch (parseError) {
+            return res.status(500).json({ error: 'Error parsing mappings file' });
+        }
+
+        // Check if the provided headers match any predefined mappings
+        const matchingMapping = mappings.find(mapping => 
+            mapping.headers.every((header, index) => headers[index] === header)
+        );
+
+        if (matchingMapping) {
+            // If a matching map is found, return only the name of the map
+            return res.json({ mappingFound: true, map: matchingMapping });
+        } else {
+            // If no matching map is found, indicate that
+            return res.json({ mappingFound: false });
+        }
+    });
 });
 
 app.delete('/expenses', (req, res) => {

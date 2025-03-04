@@ -1,0 +1,78 @@
+[
+    {
+        "name": "Chase Credit",
+        "keys": ["Transaction Date", "Description", "Amount"],
+        "headers": ["Transaction Date", "Post Date", "Description", "Category", "Type", "Amount", "Memo"],
+        "map": {
+            "date": "Transaction Date",
+            "amount": "Amount",
+            "description": "Description",
+            "category": "Category"
+        },
+        "autofillMaps": [
+            {
+                "fill": "category",
+                "fillBasedOn": "category",
+                "map": {
+                    " ": "Transfer"
+                }
+            },
+            {
+                "fill": "type",
+                "fillBasedOn": "category",
+                "map": {
+                    "Food & Drink": "Wants",
+                    "Entertainment": "Wants",
+                    "Groceries": "Needs",
+                    "Gas": "Needs",
+                    "Home": "Needs",
+                    "Health & Wellness": "Needs",
+                    "Automotive": "Needs",
+                    "Transfer": "Transfer"
+                }
+            },
+            {
+                "fill": "type",
+                "fillBasedOn": "description",
+                "map": {
+                    "Payment Thank You": "Transfer"
+                }
+            }
+        ]
+    },
+    {
+        "name": "Chase Checking",
+        "headers": ["Transaction Date", "Post Date", "Description", "Category", "Type", "Amount", "Memo"],
+        "map": {
+            "Transaction Date": "date",
+            "Post Date": "unused",
+            "Description": "description",
+            "Category": "category",
+            "Type": "unused",
+            "Memo": "unused",
+            "Amount": "amount"
+        },
+        "autofillMaps": [
+            {
+                "fill": "type",
+                "fillWith": "category",
+                "map": {
+                    "Food & Drink": "Wants",
+                    "Entertainment": "Wants",
+                    "Groceries": "Needs",
+                    "Gas": "Needs",
+                    "Home": "Needs",
+                    "Health & Wellness": "Needs",
+                    "Automotive": "Needs"
+                }
+            },
+            {
+                "fill": "type",
+                "fillWith": "description",
+                "map": {
+                    "Payment Thank You": "Transfer"
+                }
+            }
+        ]
+    }
+]
